@@ -8,23 +8,16 @@ import SwiftUI
 let logger: Logger = Logger(subsystem: "co.joehink.carrot", category: "Carrot")
 
 /// The shared top-level view for the app, loaded from the platform-specific App delegates below.
-///
-/// The default implementation merely loads the `ContentView` for the app and logs a message.
 /* SKIP @bridge */public struct CarrotRootView : View {
     /* SKIP @bridge */public init() {
     }
 
     public var body: some View {
         ContentView()
-            .task {
-                logger.info("Skip app logs are viewable in the Xcode console for iOS; Android logs can be viewed in Studio or using adb logcat")
-            }
     }
 }
 
 /// Global application delegate functions.
-///
-/// These functions can update a shared observable object to communicate app state changes to interested views.
 /* SKIP @bridge */public final class CarrotAppDelegate : Sendable {
     /* SKIP @bridge */public static let shared = CarrotAppDelegate()
 
