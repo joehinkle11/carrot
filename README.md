@@ -28,7 +28,7 @@ No timestamps. No notes. No guilt. Just counts.
 
 iOS TestFlight link: https://testflight.apple.com/join/zz62H8P3
 
-APK available on GitHub release: todo
+APK available on GitHub release: https://github.com/joehinkle11/carrot/releases/download/1.0.1/app-release.apk
 
 ## Features
 
@@ -75,8 +75,8 @@ Basic MVP working:
 ### 1.0.1
 
 - Features
- - Prevent accidentally logging on next day between edge case hours of 12AM to 5AM
- - Allow exporting all trackables into one csv
- - Spanish support
+  - Prevent accidentally logging on next day between edge case hours of 12AM to 5AM
+  - Allow exporting all trackables into one csv
+  - Spanish support
 - Bug fixes
- - fixed dark mode icon
+  - fixed dark mode icon
