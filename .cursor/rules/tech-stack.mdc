@@ -1,0 +1,10 @@
+---
+name: tech-stack
+description: This rule explains what the project tech stack is
+alwaysApply: true
+---
+
+
+There is no server. All local and saving data to a simple local SQL db via https://skip.tools/docs/modules/skip-sql/ 
+
+Now, the "backend" will be that local sql db i told you about. it is simple. we have two tables. One will be "trackables" and the other will be "counts"

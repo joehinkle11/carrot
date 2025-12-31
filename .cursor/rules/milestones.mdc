@@ -1,0 +1,69 @@
+---
+alwaysApply: true
+---
+Build the project in milestones
+
+# Milestone 1 - basic UI setup
+
+Requirements
+[] three tabs are present
+[] default "skip" empty project branding is gone
+[] `swift build` succeeds
+
+# Milestone 2 - basic UI look
+
+Requirements
+[] tabs have sf symbol icons
+[] each tab has basic scaffolding UI but no functionality
+[] `swift build` succeeds
+
+# Milestone 3 - basic backend setup
+
+Requirements
+[] new folder Sources/Carrot/Backend
+[] basic swift code setup to interface with local db, (no db code yet)
+[] new backend service singleton with stubbed apis
+[] `swift build` succeeds
+
+# Milestone 4 - fake local db in memory
+
+Requirements
+[] stubbed apis now route to a new fake class called "InMemoryDB" which fakes the sql db for now
+[] app UI uses the service a little, not much though
+[] `swift build` succeeds
+
+
+# Milestone 5 - basic working UI finished
+
+Requirements
+[] UI using the service can now create/delete/rename habits/goals (goes to trackable table) in tab 2
+[] UI using the service can now show all goals/habits in grid and clicking on one increases count for the day in tab 1
+[] tab 3 still does nothing
+[] `swift build` succeeds
+
+
+# Milestone 5 - sql backend
+
+Requirements
+[] service layer now uses skipsql to persist data and we remove the old in memory db
+[] `swift build` succeeds
+
+
+# Milestone 5 - third tab
+
+Requirements
+[] 3rd tab now shows simple horizontal scrolling button list at the top, one button per trackable
+[] when one is selected, there is a simple table view of each day and the count (including missing days with 0)
+[] the table has: date, month (jan), day of weeek (i.e. monday), count
+[] `swift build` succeeds
+
+
+# Milestone 6 - styling
+
+work closly with tech lead for this (one prompting cursor)
+
+Requirements
+[] add in nice colors
+[] add carrot logo
+[] make polish changes
+

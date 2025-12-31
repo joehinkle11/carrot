@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+trackables table
+- id (pk)
+- name
+
+counts
+- id (pk)
+- date
+- trackable_id
+- count

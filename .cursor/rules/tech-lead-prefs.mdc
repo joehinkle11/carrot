@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+
+write ALL code under Sources/Carrot in a mono module in Swift. Do not add code elsewhere and ask if you need to.
+
+Do NOT add new assets. Just leave a todo and or ask me

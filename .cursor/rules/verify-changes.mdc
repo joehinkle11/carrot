@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+To verify that you changes work, run `swift build` in the root proj directory. As you are only changing in Sources/Carrot, change error caused by changes there will be found by running `swift build`

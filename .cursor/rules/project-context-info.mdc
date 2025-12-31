@@ -1,0 +1,18 @@
+---
+name: project-context-info
+description: This rule explains what the project is about
+alwaysApply: true
+---
+
+# Overview
+
+I'm making an app with Skip tools (learn more about it here https://skip.tools/docs) 
+
+It is a simple app for iOS and Android in Swift with it called "Carrot" which is. simple habit tracker.
+
+There are three pages:
+1. Track page (tab button will have a 2x2 grid icon)
+2. Goals/habit page (tab button will have a carrot icon)
+3. History page (tab button will have a graph button)
+
+The UX flow is that users add goals/habits they want to track on the 2nd tab. i.e. "workout" or even bad habits to track i.e. "eat junk food". Then on the first tab all their "trackables" will appear in a grid. A simple tap adds an event for that day (just a count). The user isn't tracking exactly when things happen, just the amount of times that trackable thing happened for that day. Then on the third tab they can see graph/charts history of how often these habits and goals are occurring over time.
