@@ -10,8 +10,13 @@ final class BackendService {
     private var database: DatabaseProtocol
     
     private init() {
-        // TODO: Replace with SkipSQL in Milestone 5
-        self.database = InMemoryDB()
+        do {
+            self.database = try SQLDatabase()
+            logger.info("SQLDatabase initialized successfully")
+        } catch {
+            logger.error("Failed to initialize SQLDatabase: \(error), falling back to InMemoryDB")
+            self.database = InMemoryDB()
+        }
     }
     
     // MARK: - Trackables API

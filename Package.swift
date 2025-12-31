@@ -16,7 +16,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "Carrot", dependencies: [
-            .product(name: "SkipFuseUI", package: "skip-fuse-ui")
+            .product(name: "SkipFuseUI", package: "skip-fuse-ui"),
+            .product(name: "SkipSQL", package: "skip-sql")
         ], resources: [.process("Resources")], plugins: [.plugin(name: "skipstone", package: "skip")]),
     ]
 )
