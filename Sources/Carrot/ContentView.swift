@@ -809,16 +809,6 @@ struct AppInfoSheet: View {
                         Text("Joseph Hinkle")
                             .fontWeight(.medium)
                     }
-                    
-                    Divider()
-                    
-                    HStack {
-                        Text("Date")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text("December 31st, 2025")
-                            .fontWeight(.medium)
-                    }
                 }
                 .padding()
                 .background(Color.orange.opacity(0.1))
