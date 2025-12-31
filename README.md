@@ -4,52 +4,45 @@
   <img src="https://github.com/joehinkle11/carrot/blob/main/Sources/Carrot/Resources/Module.xcassets/carrot.imageset/carrot.png?raw=true" alt="Carrot Logo" width="200"/>
 </p>
 
-A simple, cross-platform habit tracker app built with [Skip](https://skip.tools) for iOS and Android.
+A dead-simple habit tracker. Tap a thing, count goes up. That's it.
 
-## Screenshots
+Built for iOS and Android with [Skip](https://skip.tools).
 
-<!-- TODO: Add screenshots -->
+## Why Carrot?
+
+Other habit trackers want to be your life coach. Streaks! Badges! Reminders! Charts! 📊🏆🔔
+
+Carrot just asks: *How many times did you do the thing today?*
+
+- Drank water? Tap. 💧
+- Worked out? Tap. 💪
+- Ate junk food? ...Tap. 🍕 *(hey, we don't judge)*
+
+No timestamps. No notes. No guilt. Just counts.
 
 ## Features
 
-- **Track Page** - View all your trackables in a grid. Tap to log an occurrence for the day.
-- **Goals/Habits Page** - Create, rename, and delete habits or goals you want to track.
-- **History Page** - View your tracking history with day-by-day counts. Export to CSV.
+- 📊 **Track** — Tap to count. Navigate between days.
+- 🥕 **Manage** — Add, rename, delete habits.
+- 📈 **History** — See your counts. Export to CSV.
 
-All data is stored locally on your device using SQLite.
+All local. All yours. SQLite under the hood.
 
-## Building
+## The Story
 
-This project is both a stand-alone Swift Package Manager module,
-as well as an Xcode project that builds and transpiles the project
-into a Kotlin Gradle project for Android using the Skip plugin.
+Two days before 2025 ended, I wanted to track some habits for 2026. Every app was overkill. So I vibe-coded this with [Cursor](https://cursor.com) + [Skip](https://skip.tools) in one sitting.
 
-Building the module requires that Skip be installed using
-[Homebrew](https://brew.sh) with `brew install skiptools/skip/skip`.
+Check `.cursor/rules/milestones.mdc` if you're curious how it was built.
 
-This will also install the necessary transpiler prerequisites:
-Kotlin, Gradle, and the Android build tools.
+## Run It
 
-Installation prerequisites can be confirmed by running `skip checkup`.
+```bash
+brew install skiptools/skip/skip
+skip checkup
+```
 
-## Running
+Then open in Xcode and hit run. Works on iOS and Android.
 
-Xcode and Android Studio must be downloaded and installed in order to
-run the app in the iOS simulator / Android emulator.
-An Android emulator must already be running, which can be launched from
-Android Studio's Device Manager.
+---
 
-To run both the Swift and Kotlin apps simultaneously,
-launch the Carrot target from Xcode.
-A build phase runs the "Launch Android APK" script that
-will deploy the transpiled app to a running Android emulator or connected device.
-Logging output for the iOS app can be viewed in the Xcode console, and in
-Android Studio's logcat tab for the transpiled Kotlin app.
-
-## Author
-
-Created by Joseph Hinkle on December 31st, 2025.
-
-## License
-
-This software is licensed under the [GNU General Public License v2.0 or later](https://spdx.org/licenses/GPL-2.0-or-later.html).
+Made by **Joseph Hinkle** • Dec 31, 2025 • [GPL-2.0-or-later](https://spdx.org/licenses/GPL-2.0-or-later.html)
