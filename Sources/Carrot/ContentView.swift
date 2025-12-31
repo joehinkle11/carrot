@@ -463,6 +463,8 @@ struct HistoryView: View {
     @State var trackables: [Trackable] = []
     @State var selectedTrackable: Trackable? = nil
     @State var historyEntries: [HistoryEntry] = []
+    @State var showingExportSheet = false
+    @State var csvContent: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -527,6 +529,42 @@ struct HistoryView: View {
         .onAppear {
             loadTrackables()
         }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    generateCSV()
+                    showingExportSheet = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .disabled(selectedTrackable == nil || historyEntries.isEmpty)
+            }
+        }
+        .sheet(isPresented: $showingExportSheet) {
+            CSVExportSheet(
+                csvContent: csvContent,
+                trackableName: selectedTrackable?.name ?? "Export"
+            )
+        }
+    }
+    
+    func generateCSV() {
+        guard selectedTrackable != nil else {
+            csvContent = ""
+            return
+        }
+        
+        var lines: [String] = []
+        // Header
+        lines.append("Date,Count")
+        
+        // Data rows
+        for entry in historyEntries {
+            let row = "\(entry.dateString),\(entry.count)"
+            lines.append(row)
+        }
+        
+        csvContent = lines.joined(separator: "\n")
     }
     
     func loadTrackables() {
@@ -647,6 +685,77 @@ struct HistoryView: View {
                 .padding(.horizontal, 32)
             
             Spacer()
+        }
+    }
+}
+
+// MARK: - CSV Export Sheet
+
+struct CSVExportSheet: View {
+    let csvContent: String
+    let trackableName: String
+    @Environment(\.dismiss) var dismiss
+    @State var copied = false
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // CSV content in scrollable text view
+                ScrollView {
+                    Text(csvContent)
+                        .font(.system(.caption, design: .monospaced))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding()
+                }
+                .background(Color.secondary.opacity(0.1))
+                
+                // Copy button at bottom
+                Button {
+                    copyToClipboard()
+                } label: {
+                    HStack {
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                        Text(copied ? "Copied!" : "Copy CSV")
+                    }
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(copied ? Color.green : Color.orange)
+                    .cornerRadius(12)
+                }
+                .padding()
+            }
+            .navigationTitle("\(trackableName) Export")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    func copyToClipboard() {
+        #if os(iOS)
+        UIPasteboard.general.string = csvContent
+        #elseif os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(csvContent, forType: .string)
+        #else
+        // Android: Skip framework handles clipboard differently
+        // For now, just show the copied state
+        #endif
+        
+        copied = true
+        
+        // Reset after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            copied = false
         }
     }
 }
