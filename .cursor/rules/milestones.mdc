@@ -118,3 +118,16 @@ Requirements
 Requirements
 [] support localized spanish version
 [] `swift build` succeeds
+
+
+# Milestone 15 - Graphing
+
+Users should be able to see their progress in a graph/chart
+
+Requirements
+[] New file for graphing code which supports Android/iOS simple line chart using SwiftUI only (no Swift graph / charts APIs, that way it works with Android via Skip SwiftUI)
+[] Show a graph button toggle on the nav bar of the history page
+[] Show the graph of that category when the toggle is on
+[] Add a start and end date selector for changing the viewed range
+[] `swift build` succeeds
+[] `skip android build` succeeds

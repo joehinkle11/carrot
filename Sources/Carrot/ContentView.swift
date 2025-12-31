@@ -536,6 +536,9 @@ struct HistoryView: View {
     @State var showingExportSheet = false
     @State var showingInfoSheet = false
     @State var showingExportAllSheet = false
+    @State var showGraph = false
+    @State var startDate: Date = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+    @State var endDate: Date = Date()
     
     var body: some View {
         VStack(spacing: 0) {
@@ -567,7 +570,13 @@ struct HistoryView: View {
             
             // Content area
             if let selected = selectedTrackable {
-                if historyEntries.isEmpty {
+                // Date range selectors (always visible when trackable is selected)
+                dateRangeSelector(for: selected)
+                
+                if showGraph {
+                    // Graph view
+                    graphContentView(for: selected)
+                } else if historyEntries.isEmpty {
                     emptyHistoryView(for: selected)
                 } else {
                     List {
@@ -604,6 +613,18 @@ struct HistoryView: View {
             ToolbarItem(placement: .primaryAction) {
                 HStack(spacing: 16) {
                     Button {
+                        showGraph.toggle()
+                    } label: {
+                        #if os(iOS)
+                        Image(systemName: showGraph ? "chart.line.uptrend.xyaxis.circle.fill" : "chart.line.uptrend.xyaxis.circle")
+                            .foregroundStyle(showGraph ? .orange : .secondary)
+                        #else
+                        Text(showGraph ? "Show List" : "Show Graph")
+                            .foregroundStyle(.orange)
+                        #endif
+                    }
+                    
+                    Button {
                         showingInfoSheet = true
                     } label: {
                         Image(systemName: "info.circle")
@@ -623,6 +644,8 @@ struct HistoryView: View {
             CSVExportSheet(
                 trackableName: selectedTrackable?.name ?? "Export",
                 isExportingAll: false,
+                startDate: startDate,
+                endDate: endDate,
                 onExportAll: {
                     generateAllCSV()
                     showingExportSheet = false
@@ -636,6 +659,8 @@ struct HistoryView: View {
             CSVExportSheet(
                 trackableName: "All Categories",
                 isExportingAll: true,
+                startDate: startDate,
+                endDate: endDate,
                 onExportAll: nil
             )
         }
@@ -729,10 +754,9 @@ struct HistoryView: View {
             countsByDate[count.date] = count.count
         }
         
-        // Generate entries for the last 30 days (including days with 0)
+        // Generate entries for the date range (including days with 0)
         var entries: [HistoryEntry] = []
         let calendar = Calendar.current
-        let today = Date()
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -743,8 +767,14 @@ struct HistoryView: View {
         let dayOfWeekFormatter = DateFormatter()
         dayOfWeekFormatter.dateFormat = "EEEE"
         
-        for dayOffset in 0..<30 {
-            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
+        // Calculate days between start and end date
+        let startOfStartDate = calendar.startOfDay(for: startDate)
+        let startOfEndDate = calendar.startOfDay(for: endDate)
+        let components = calendar.dateComponents([.day], from: startOfStartDate, to: startOfEndDate)
+        let numberOfDays = (components.day ?? 30) + 1
+        
+        for dayOffset in 0..<numberOfDays {
+            guard let date = calendar.date(byAdding: .day, value: dayOffset, to: startOfStartDate) else { continue }
             let dateString = dateFormatter.string(from: date)
             let day = calendar.component(.day, from: date)
             let month = monthFormatter.string(from: date)
@@ -763,7 +793,8 @@ struct HistoryView: View {
             entries.append(entry)
         }
         
-        historyEntries = entries
+        // Reverse so most recent is first (for table view)
+        historyEntries = entries.reversed()
     }
     
     private var emptyStateView: some View {
@@ -831,6 +862,141 @@ struct HistoryView: View {
             Spacer()
         }
     }
+    
+    private func dateRangeSelector(for trackable: Trackable) -> some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Start")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                DatePicker("", selection: $startDate, displayedComponents: .date)
+                    .labelsHidden()
+                    .onChange(of: startDate) { _, _ in
+                        // Ensure start is not after end
+                        if startDate > endDate {
+                            startDate = endDate
+                        }
+                        loadHistory(for: trackable)
+                    }
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("End")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                DatePicker("", selection: $endDate, displayedComponents: .date)
+                    .labelsHidden()
+                    .onChange(of: endDate) { _, _ in
+                        // Ensure end is not before start
+                        if endDate < startDate {
+                            endDate = startDate
+                        }
+                        loadHistory(for: trackable)
+                    }
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color.orange.opacity(0.05))
+    }
+    
+    private func graphContentView(for trackable: Trackable) -> some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                // Chart
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(trackable.name)
+                        .font(.headline)
+                    
+                    if chartDataPoints.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.secondary)
+                            Text("No data in selected range")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(height: 200)
+                        .frame(maxWidth: .infinity)
+                    } else {
+                        LineChartView(dataPoints: chartDataPoints)
+                            .frame(height: 220)
+                    }
+                }
+                .padding()
+                .background(Color.orange.opacity(0.05))
+                .cornerRadius(12)
+                
+                // Summary stats
+                VStack(spacing: 12) {
+                    HStack {
+                        Text("Summary")
+                            .font(.headline)
+                        Spacer()
+                    }
+                    
+                    HStack(spacing: 24) {
+                        StatBox(title: "Total", value: "\(totalCount)")
+                        StatBox(title: "Average", value: String(format: "%.1f", averageCount))
+                        StatBox(title: "Max", value: "\(maxCount)")
+                    }
+                }
+                .padding()
+                .background(Color.orange.opacity(0.05))
+                .cornerRadius(12)
+            }
+            .padding()
+        }
+    }
+    
+    private var chartDataPoints: [ChartDataPoint] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "M/d"
+        
+        return historyEntries.map { entry in
+            ChartDataPoint(
+                id: entry.id,
+                date: entry.date,
+                value: Double(entry.count),
+                label: dateFormatter.string(from: entry.date)
+            )
+        }
+    }
+    
+    private var totalCount: Int {
+        historyEntries.reduce(0) { $0 + $1.count }
+    }
+    
+    private var averageCount: Double {
+        guard !historyEntries.isEmpty else { return 0 }
+        return Double(totalCount) / Double(historyEntries.count)
+    }
+    
+    private var maxCount: Int {
+        historyEntries.map { $0.count }.max() ?? 0
+    }
+}
+
+/// Simple stat box for summary display
+struct StatBox: View {
+    let title: String
+    let value: String
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.orange)
+        }
+        .frame(maxWidth: .infinity)
+    }
 }
 
 // MARK: - CSV Export Sheet
@@ -838,6 +1004,8 @@ struct HistoryView: View {
 struct CSVExportSheet: View {
     let trackableName: String
     let isExportingAll: Bool
+    let startDate: Date
+    let endDate: Date
     let onExportAll: (() -> Void)?
     @Environment(\.dismiss) var dismiss
     @State var copied = false
@@ -847,28 +1015,44 @@ struct CSVExportSheet: View {
         isExportingAll ? allCSVContent : csvContent
     }
     
+    private var dateRangeText: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
+    }
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Export indicator
-                HStack {
-                    if isExportingAll {
-                    Image("carrotsmall", bundle: .module)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .foregroundStyle(.orange)
-                    } else {
-                        Image(systemName: "magnifyingglass")
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        if isExportingAll {
+                        Image("carrotsmall", bundle: .module)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24)
+                            .foregroundStyle(.orange)
+                        } else {
+                            Image(systemName: "magnifyingglass")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(isExportingAll ? "Exporting all categories" : "Exporting: \(trackableName)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                    
+                    HStack {
+                        Image(systemName: "calendar")
+                            .foregroundStyle(.orange)
+                        Text(dateRangeText)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    Text(isExportingAll ? "Exporting all categories" : "Exporting: \(trackableName)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Spacer()
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 10)
