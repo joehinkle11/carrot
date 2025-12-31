@@ -15,14 +15,30 @@ struct ContentView: View {
                 TrackView()
                     .navigationTitle("Track")
             }
-            .tabItem { Label("Track", systemImage: "square.grid.2x2.fill") }
+            .tabItem {
+                Label {
+                    Text("Track")
+                } icon: {
+                    Image("grid", bundle: .module)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
+            }
             .tag(ContentTab.track)
 
             NavigationStack {
                 GoalsView()
                     .navigationTitle("Goals")
             }
-            .tabItem { Label("Goals", systemImage: "carrot.fill") }
+            .tabItem {
+                Label {
+                    Text("Goals")
+                } icon: {
+                    Image("carrot", bundle: .module)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
+            }
             .tag(ContentTab.goals)
 
             NavigationStack {
@@ -96,9 +112,9 @@ struct TrackView: View {
         VStack(spacing: 24) {
             Spacer()
             
-            Image(systemName: "square.grid.2x2.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.secondary)
+            Image("grid", bundle: .module)
+                .resizable()
+                .frame(width: 100, height: 100)
             
             Text("Your Trackables")
                 .font(.title2)
@@ -247,9 +263,9 @@ struct GoalsView: View {
         VStack(spacing: 24) {
             Spacer()
             
-            Image(systemName: "carrot.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.orange)
+            Image("carrot", bundle: .module)
+                .resizable()
+                .frame(width: 100, height: 100)
             
             Text("Goals & Habits")
                 .font(.title2)
