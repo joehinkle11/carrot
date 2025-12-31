@@ -1,19 +1,23 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import Foundation
-import SkipSQL
+import SkipSQLPlus
 
 /// SQLite database implementation using SkipSQL
 class SQLDatabase: DatabaseProtocol {
     private let db: SQLContext
     
     init() throws {
-        // Get the app's documents directory for the database file
-        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let dbPath = documentsPath.appendingPathComponent("carrot.db").path
+        // Get the app's application support directory for the database file
+        // Using URL.applicationSupportDirectory which works on both iOS and Android
+        let supportDir = URL.applicationSupportDirectory
+        let dbPath = supportDir.appendingPathComponent("carrot.db").path
         
-        // Open or create the database
-        db = try SQLContext(path: dbPath, flags: [.create, .readWrite], configuration: .platform)
+        // Ensure directory exists
+        try FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
+        
+        // Open or create the database using SQLPlus for consistent SQLite version across platforms
+        db = try SQLContext(path: dbPath, flags: [.create, .readWrite], configuration: .plus)
         
         // Create tables if they don't exist
         try createTables()
