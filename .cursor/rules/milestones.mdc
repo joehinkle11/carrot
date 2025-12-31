@@ -111,3 +111,10 @@ Requirements
 [] when exporting, there is an indicator on the sheet saying you are exporting just that column
 [] when  exporting, there is another button which says "export all categories" which opens another sheet (reuse view component) (export all button shouldn't be present on that secondary sheet)
 [] `swift build` succeeds
+
+
+# Milestone 14 - Spanish support
+
+Requirements
+[] support localized spanish version
+[] `swift build` succeeds

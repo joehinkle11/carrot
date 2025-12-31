@@ -64,5 +64,9 @@ Basic MVP working:
 
 ### 1.0.1
 
+- Features
+ - Prevent accidentally logging on next day between edge case hours of 12AM to 5AM
+ - Allow exporting all trackables into one csv
+ - Spanish support
 - Bug fixes
-  - fixed dark mode icon
+ - fixed dark mode icon
