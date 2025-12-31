@@ -10,8 +10,8 @@ final class BackendService {
     private var database: DatabaseProtocol
     
     private init() {
-        // TODO: Replace with real database implementation
-        self.database = StubDatabase()
+        // TODO: Replace with SkipSQL in Milestone 5
+        self.database = InMemoryDB()
     }
     
     // MARK: - Trackables API
@@ -107,42 +107,5 @@ final class BackendService {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: Date())
-    }
-}
-
-// MARK: - Stub Database (temporary)
-
-/// A stub database that does nothing - will be replaced by InMemoryDB in Milestone 4
-private class StubDatabase: DatabaseProtocol {
-    func getAllTrackables() throws -> [Trackable] {
-        return []
-    }
-    
-    func createTrackable(name: String) throws -> Trackable {
-        return Trackable(id: 0, name: name)
-    }
-    
-    func updateTrackable(_ trackable: Trackable) throws {
-        // No-op
-    }
-    
-    func deleteTrackable(id: Int64) throws {
-        // No-op
-    }
-    
-    func getCount(trackableId: Int64, date: String) throws -> Count? {
-        return nil
-    }
-    
-    func getAllCounts(trackableId: Int64) throws -> [Count] {
-        return []
-    }
-    
-    func incrementCount(trackableId: Int64, date: String) throws -> Count {
-        return Count(id: 0, date: date, trackableId: trackableId, count: 1)
-    }
-    
-    func setCount(trackableId: Int64, date: String, count: Int) throws -> Count {
-        return Count(id: 0, date: date, trackableId: trackableId, count: count)
     }
 }

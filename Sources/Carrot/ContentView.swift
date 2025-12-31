@@ -37,7 +37,23 @@ struct ContentView: View {
 
 // MARK: - Track View
 struct TrackView: View {
+    @State var trackables: [Trackable] = []
+    
     var body: some View {
+        Group {
+            if trackables.isEmpty {
+                emptyStateView
+            } else {
+                Text("\(trackables.count) trackables loaded")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .task {
+            trackables = BackendService.shared.getAllTrackables()
+        }
+    }
+    
+    private var emptyStateView: some View {
         VStack(spacing: 24) {
             Spacer()
             
@@ -67,7 +83,56 @@ struct TrackView: View {
 
 // MARK: - Goals View
 struct GoalsView: View {
+    @State var trackables: [Trackable] = []
+    @State var showingAddAlert = false
+    @State var newTrackableName = ""
+    
     var body: some View {
+        Group {
+            if trackables.isEmpty {
+                emptyStateView
+            } else {
+                List {
+                    ForEach(trackables) { trackable in
+                        Text(trackable.name)
+                    }
+                }
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    newTrackableName = ""
+                    showingAddAlert = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .alert("New Goal", isPresented: $showingAddAlert) {
+            TextField("Name", text: $newTrackableName)
+            Button("Cancel", role: .cancel) { }
+            Button("Add") {
+                addTrackable()
+            }
+        } message: {
+            Text("Enter a name for your new habit or goal")
+        }
+        .task {
+            trackables = BackendService.shared.getAllTrackables()
+        }
+    }
+    
+    func addTrackable() {
+        let name = newTrackableName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        
+        if let _ = BackendService.shared.createTrackable(name: name) {
+            trackables = BackendService.shared.getAllTrackables()
+        }
+    }
+    
+    private var emptyStateView: some View {
         VStack(spacing: 24) {
             Spacer()
             
@@ -86,15 +151,6 @@ struct GoalsView: View {
                 .padding(.horizontal, 32)
             
             Spacer()
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    // TODO: Add new trackable
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
         }
     }
 }
