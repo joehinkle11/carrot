@@ -852,8 +852,19 @@ struct CSVExportSheet: View {
             VStack(spacing: 0) {
                 // Export indicator
                 HStack {
-                    Image(isExportingAll ? "name" : "carrotsmall")
+                    if isExportingAll {
+                    Image("carrotsmall", bundle: .module)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
                         .foregroundStyle(.orange)
+                    } else {
+                        Image(systemName: "magnifyingglass")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundStyle(.secondary)
+                    }
                     Text(isExportingAll ? "Exporting all categories" : "Exporting: \(trackableName)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -894,7 +905,11 @@ struct CSVExportSheet: View {
                             exportAll()
                         } label: {
                             HStack {
-                                Image(systemName: "square.grid.2x2")
+                                Image("carrotsmall", bundle: .module)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 24, height: 24)
+                                    .foregroundStyle(.orange)
                                 Text("Export All Categories")
                             }
                             .font(.headline)
