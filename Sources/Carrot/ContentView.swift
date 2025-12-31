@@ -62,7 +62,7 @@ struct ContentView: View {
                 Label {
                     Text("History")
                 } icon: {
-                    Image("grid", bundle: .module)
+                    Image("chart", bundle: .module)
                         .resizable()
                         .frame(width: 24, height: 24)
                 }
