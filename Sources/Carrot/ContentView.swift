@@ -466,6 +466,7 @@ struct HistoryView: View {
     @State var selectedTrackable: Trackable? = nil
     @State var historyEntries: [HistoryEntry] = []
     @State var showingExportSheet = false
+    @State var showingInfoSheet = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -532,19 +533,30 @@ struct HistoryView: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    generateCSV()
-                    showingExportSheet = true
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
+                HStack(spacing: 16) {
+                    Button {
+                        showingInfoSheet = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    
+                    Button {
+                        generateCSV()
+                        showingExportSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .disabled(selectedTrackable == nil || historyEntries.isEmpty)
                 }
-                .disabled(selectedTrackable == nil || historyEntries.isEmpty)
             }
         }
         .sheet(isPresented: $showingExportSheet) {
             CSVExportSheet(
                 trackableName: selectedTrackable?.name ?? "Export"
             )
+        }
+        .sheet(isPresented: $showingInfoSheet) {
+            AppInfoSheet()
         }
     }
     
@@ -738,13 +750,95 @@ struct CSVExportSheet: View {
     }
     
     func copyToClipboard() {
+        #if !os(macOS)
         UIPasteboard.general.string = csvContent
+        #endif
         
         copied = true
         
         // Reset after 2 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             copied = false
+        }
+    }
+}
+
+// MARK: - App Info Sheet
+
+struct AppInfoSheet: View {
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 32) {
+                Spacer()
+                
+                // App icon/logo
+                Image("carrot", bundle: .module)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 120, height: 120)
+                
+                // App name
+                Text("Carrot")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.orange)
+                
+                // App description
+                Text("Simple Habit Tracker")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+                
+                // Info details
+                VStack(spacing: 16) {
+                    HStack {
+                        Text("Version")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("1.0.0")
+                            .fontWeight(.medium)
+                    }
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Created by")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("Joseph Hinkle")
+                            .fontWeight(.medium)
+                    }
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Date")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("December 31st, 2025")
+                            .fontWeight(.medium)
+                    }
+                }
+                .padding()
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(12)
+                .padding(.horizontal)
+                
+                Spacer()
+                Spacer()
+            }
+            .navigationTitle("About")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }
