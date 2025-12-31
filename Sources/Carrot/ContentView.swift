@@ -6,6 +6,14 @@ enum ContentTab: String, Hashable {
     case track, goals, history
 }
 
+enum Constants {
+    #if os(iOS)
+    static let minusCircleFill = "minus.circle.fill"
+    #else
+    static let minusCircleFill = "Icons.Outlined.RemoveCircle"
+    #endif
+}
+
 struct ContentView: View {
     @AppStorage("tab") var tab = ContentTab.track
 
@@ -293,7 +301,7 @@ struct AdvancedTrackableGridItem: View {
             
             HStack(spacing: 24) {
                 Button(action: onDecrement) {
-                    Image(systemName: "minus.circle.fill")
+                    Image(systemName: Constants.minusCircleFill)
                         .font(.title)
                         .foregroundStyle(count > 0 ? .orange : .secondary)
                 }
