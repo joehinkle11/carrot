@@ -267,8 +267,144 @@ struct GoalsView: View {
 }
 
 // MARK: - History View
+
+/// Represents a single row in the history table
+struct HistoryEntry: Identifiable {
+    let id: String  // date string as id
+    let date: Date
+    let dateString: String  // YYYY-MM-DD
+    let day: Int
+    let month: String
+    let dayOfWeek: String
+    let count: Int
+}
+
 struct HistoryView: View {
+    @State var trackables: [Trackable] = []
+    @State var selectedTrackable: Trackable? = nil
+    @State var historyEntries: [HistoryEntry] = []
+    
     var body: some View {
+        VStack(spacing: 0) {
+            // Horizontal scrolling trackable buttons
+            if !trackables.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(trackables) { trackable in
+                            Button {
+                                selectedTrackable = trackable
+                                loadHistory(for: trackable)
+                            } label: {
+                                Text(trackable.name)
+                                    .font(.subheadline)
+                                    .fontWeight(selectedTrackable?.id == trackable.id ? .semibold : .regular)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(selectedTrackable?.id == trackable.id ? Color.orange : Color.orange.opacity(0.1))
+                                    .foregroundStyle(selectedTrackable?.id == trackable.id ? .white : .primary)
+                                    .cornerRadius(20)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
+                }
+            }
+            
+            // Content area
+            if let selected = selectedTrackable {
+                if historyEntries.isEmpty {
+                    emptyHistoryView(for: selected)
+                } else {
+                    List {
+                        ForEach(historyEntries) { entry in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(entry.dayOfWeek)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text("\(entry.month) \(entry.day)")
+                                        .font(.headline)
+                                }
+                                Spacer()
+                                Text("\(entry.count)")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(entry.count > 0 ? .orange : .secondary)
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+            } else if trackables.isEmpty {
+                emptyStateView
+            } else {
+                selectTrackableView
+            }
+        }
+        .onAppear {
+            loadTrackables()
+        }
+    }
+    
+    func loadTrackables() {
+        trackables = BackendService.shared.getAllTrackables()
+        // Auto-select first trackable if available
+        if selectedTrackable == nil, let first = trackables.first {
+            selectedTrackable = first
+            loadHistory(for: first)
+        }
+    }
+    
+    func loadHistory(for trackable: Trackable) {
+        let counts = BackendService.shared.getAllCounts(trackableId: trackable.id)
+        
+        // Build a dictionary of date string -> count
+        var countsByDate: [String: Int] = [:]
+        for count in counts {
+            countsByDate[count.date] = count.count
+        }
+        
+        // Generate entries for the last 30 days (including days with 0)
+        var entries: [HistoryEntry] = []
+        let calendar = Calendar.current
+        let today = Date()
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let monthFormatter = DateFormatter()
+        monthFormatter.dateFormat = "MMM"
+        
+        let dayOfWeekFormatter = DateFormatter()
+        dayOfWeekFormatter.dateFormat = "EEEE"
+        
+        for dayOffset in 0..<30 {
+            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
+            let dateString = dateFormatter.string(from: date)
+            let day = calendar.component(.day, from: date)
+            let month = monthFormatter.string(from: date)
+            let dayOfWeek = dayOfWeekFormatter.string(from: date)
+            let count = countsByDate[dateString] ?? 0
+            
+            let entry = HistoryEntry(
+                id: dateString,
+                date: date,
+                dateString: dateString,
+                day: day,
+                month: month,
+                dayOfWeek: dayOfWeek,
+                count: count
+            )
+            entries.append(entry)
+        }
+        
+        historyEntries = entries
+    }
+    
+    private var emptyStateView: some View {
         VStack(spacing: 24) {
             Spacer()
             
@@ -280,7 +416,51 @@ struct HistoryView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
             
-            Text("View your tracking history and progress over time")
+            Text("Add some habits in the Goals tab to see your history")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            
+            Spacer()
+        }
+    }
+    
+    private var selectTrackableView: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            
+            Image(systemName: "hand.tap.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(.secondary)
+            
+            Text("Select a Trackable")
+                .font(.title2)
+                .fontWeight(.semibold)
+            
+            Text("Tap on a habit above to see its history")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            
+            Spacer()
+        }
+    }
+    
+    private func emptyHistoryView(for trackable: Trackable) -> some View {
+        VStack(spacing: 24) {
+            Spacer()
+            
+            Image(systemName: "calendar")
+                .font(.system(size: 64))
+                .foregroundStyle(.secondary)
+            
+            Text("No History Yet")
+                .font(.title2)
+                .fontWeight(.semibold)
+            
+            Text("Start tracking '\(trackable.name)' to see your history here")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
