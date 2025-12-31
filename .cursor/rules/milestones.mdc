@@ -84,3 +84,12 @@ Requirements
 [] csv is shared as a single text view which is scrollable on a sheet
 [] copy button for csv contents
 [] `swift build` succeeds
+
+
+# Milestone 11 - add app info
+
+Requirements
+[] in the 3rd tab, user should have an info button which shows an info sheet
+[] app info says creator is Joseph Hinkle on Dec 31th 2025
+[] app version is 1.0.0
+[] `swift build` succeeds
