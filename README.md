@@ -8,7 +8,7 @@ A dead-simple habit tracker. Tap a thing, count goes up. That's it.
 
 Built for iOS and Android with [Skip](https://skip.tools).
 
-| Image 1 | Image 2 | Image 3 | Image 4 | Image 5 | Image 6 |
+| CSV Export | History | Graphs | Inc/dec Counts | Tap to Count | Add Goals |
 |--------|--------|--------|--------|--------|--------|
 | <img width="81" height="174" alt="IMG_4613" src="https://github.com/user-attachments/assets/01d4cf24-5fe3-4e2f-91d8-509d8e77bdc0" /> | <img width="81" height="174" alt="IMG_4612" src="https://github.com/user-attachments/assets/597147a3-9a69-4cdc-acb0-41353b102222" /> | <img width="81" height="174" alt="IMG_4611" src="https://github.com/user-attachments/assets/36bb6440-bef8-424c-a19a-a67c0d18bf10" /> | <img width="81" height="174" alt="IMG_4610" src="https://github.com/user-attachments/assets/2c0a6e67-3d52-4703-9d62-92937a518e7f" /> | <img width="81" height="174" alt="IMG_4609" src="https://github.com/user-attachments/assets/f020a6ab-d56f-4c57-a4ae-d8ad52036623" /> | <img width="81" height="174" alt="IMG_4608" src="https://github.com/user-attachments/assets/26792f66-2960-4dd4-9118-9efa18aa0367" /> |
 
