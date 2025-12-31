@@ -93,3 +93,13 @@ Requirements
 [] app info says creator is Joseph Hinkle on Dec 31th 2025
 [] app version is 1.0.0
 [] `swift build` succeeds
+
+
+# Milestone 12 - waking cycle guard
+
+problem: users might accidentally log a count at 1AM on Tuesday under Tuesday when it should be grouped into Monday's count. The app is meant to track counts per waking cycle
+
+Requirements
+[] when the user is between the hours of 12AM and 5AM, assume they are logging for the previous day in the first tab, but still allow them to manually click the forward arrow to log the next day (i.e. in case they just woke up very early at like 4am that day)
+[] when clicking the forward arrow in that 12-5 range, show a modal which asks them "did you already sleep?" or "did you just wake up?" or something with a little explainer about how they should log based on their sleep wake cycle, not on the day hour cycle. if they say "no", then cancel the forward action. if "yes, i slept", then allow the forward move
+[] `swift build` succeeds
