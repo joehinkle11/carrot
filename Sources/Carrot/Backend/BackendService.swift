@@ -95,6 +95,16 @@ final class BackendService {
         }
     }
     
+    /// Decrement the count for a trackable on a specific date (minimum 0)
+    func decrementCount(trackableId: Int64, date: String) -> Count? {
+        do {
+            return try database.decrementCount(trackableId: trackableId, date: date)
+        } catch {
+            logger.error("Failed to decrement count: \(error)")
+            return nil
+        }
+    }
+    
     /// Set the count for a trackable on a specific date
     func setCount(trackableId: Int64, date: String, count: Int) -> Count? {
         do {
@@ -109,8 +119,13 @@ final class BackendService {
     
     /// Get today's date as a string in YYYY-MM-DD format
     func todayString() -> String {
+        return dateString(from: Date())
+    }
+    
+    /// Convert a Date to a string in YYYY-MM-DD format
+    func dateString(from date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: Date())
+        return formatter.string(from: date)
     }
 }

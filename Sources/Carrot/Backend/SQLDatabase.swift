@@ -132,6 +132,26 @@ class SQLDatabase: DatabaseProtocol {
         }
     }
     
+    func decrementCount(trackableId: Int64, date: String) throws -> Count {
+        // Try to get existing count
+        if let existing = try getCount(trackableId: trackableId, date: date) {
+            let newCount = max(0, existing.count - 1)
+            try db.exec(
+                sql: "UPDATE counts SET count = ? WHERE id = ?",
+                parameters: [.integer(Int64(newCount)), .integer(existing.id)]
+            )
+            return Count(id: existing.id, date: date, trackableId: trackableId, count: newCount)
+        } else {
+            // No existing count, return 0
+            try db.exec(
+                sql: "INSERT INTO counts (date, trackable_id, count) VALUES (?, ?, ?)",
+                parameters: [.text(date), .integer(trackableId), .integer(0)]
+            )
+            let id = db.lastInsertRowID
+            return Count(id: id, date: date, trackableId: trackableId, count: 0)
+        }
+    }
+    
     func setCount(trackableId: Int64, date: String, count: Int) throws -> Count {
         // Try to get existing count
         if let existing = try getCount(trackableId: trackableId, date: date) {

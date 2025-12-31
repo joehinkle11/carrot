@@ -29,6 +29,9 @@ protocol DatabaseProtocol {
     /// Increment count for a trackable on a specific date
     func incrementCount(trackableId: Int64, date: String) throws -> Count
     
+    /// Decrement count for a trackable on a specific date (minimum 0)
+    func decrementCount(trackableId: Int64, date: String) throws -> Count
+    
     /// Set count for a trackable on a specific date
     func setCount(trackableId: Int64, date: String, count: Int) throws -> Count
 }

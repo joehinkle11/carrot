@@ -63,31 +63,111 @@ struct ContentView: View {
 // MARK: - Track View
 struct TrackView: View {
     @State var trackables: [Trackable] = []
-    @State var todayCounts: [Int64: Int] = [:]  // trackableId -> count
+    @State var dayCounts: [Int64: Int] = [:]  // trackableId -> count
+    @State var selectedDate: Date = Date()
+    @State var isAdvancedMode: Bool = false
     
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
     
+    private var isToday: Bool {
+        Calendar.current.isDateInToday(selectedDate)
+    }
+    
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, MMM d"
+        return formatter.string(from: selectedDate)
+    }
+    
     var body: some View {
-        Group {
-            if trackables.isEmpty {
-                emptyStateView
-            } else {
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(trackables) { trackable in
-                            TrackableGridItem(
-                                trackable: trackable,
-                                count: todayCounts[trackable.id] ?? 0,
-                                onTap: {
-                                    incrementCount(for: trackable)
-                                }
-                            )
-                        }
+        VStack(spacing: 0) {
+            // Date navigation header
+            HStack {
+                Button {
+                    goToPreviousDay()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.orange)
+                        .frame(width: 44, height: 44)
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 2) {
+                    Text(formattedDate)
+                        .font(.headline)
+                    if isToday {
+                        Text("Today")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-                    .padding()
+                }
+                
+                Spacer()
+                
+                Button {
+                    goToNextDay()
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(isToday ? Color.secondary : Color.orange)
+                        .frame(width: 44, height: 44)
+                }
+                .disabled(isToday)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color.orange.opacity(0.05))
+            
+            // Advanced mode toggle
+            HStack {
+                Toggle(isOn: $isAdvancedMode) {
+                    Text("Advanced Mode")
+                        .font(.subheadline)
+                }
+                .tint(.orange)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            
+            // Content
+            Group {
+                if trackables.isEmpty {
+                    emptyStateView
+                } else {
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(trackables) { trackable in
+                                if isAdvancedMode {
+                                    AdvancedTrackableGridItem(
+                                        trackable: trackable,
+                                        count: dayCounts[trackable.id] ?? 0,
+                                        onIncrement: {
+                                            incrementCount(for: trackable)
+                                        },
+                                        onDecrement: {
+                                            decrementCount(for: trackable)
+                                        }
+                                    )
+                                } else {
+                                    TrackableGridItem(
+                                        trackable: trackable,
+                                        count: dayCounts[trackable.id] ?? 0,
+                                        onTap: {
+                                            incrementCount(for: trackable)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        .padding()
+                    }
                 }
             }
         }
@@ -96,24 +176,47 @@ struct TrackView: View {
         }
     }
     
+    func goToPreviousDay() {
+        if let newDate = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) {
+            selectedDate = newDate
+            refreshData()
+        }
+    }
+    
+    func goToNextDay() {
+        if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: selectedDate) {
+            if newDate <= Date() {
+                selectedDate = newDate
+                refreshData()
+            }
+        }
+    }
+    
     func refreshData() {
         trackables = BackendService.shared.getAllTrackables()
-        let today = BackendService.shared.todayString()
+        let dateString = BackendService.shared.dateString(from: selectedDate)
         var counts: [Int64: Int] = [:]
         for trackable in trackables {
-            if let count = BackendService.shared.getCount(trackableId: trackable.id, date: today) {
+            if let count = BackendService.shared.getCount(trackableId: trackable.id, date: dateString) {
                 counts[trackable.id] = count.count
             } else {
                 counts[trackable.id] = 0
             }
         }
-        todayCounts = counts
+        dayCounts = counts
     }
     
     func incrementCount(for trackable: Trackable) {
-        let today = BackendService.shared.todayString()
-        if let newCount = BackendService.shared.incrementCount(trackableId: trackable.id, date: today) {
-            todayCounts[trackable.id] = newCount.count
+        let dateString = BackendService.shared.dateString(from: selectedDate)
+        if let newCount = BackendService.shared.incrementCount(trackableId: trackable.id, date: dateString) {
+            dayCounts[trackable.id] = newCount.count
+        }
+    }
+    
+    func decrementCount(for trackable: Trackable) {
+        let dateString = BackendService.shared.dateString(from: selectedDate)
+        if let newCount = BackendService.shared.decrementCount(trackableId: trackable.id, date: dateString) {
+            dayCounts[trackable.id] = newCount.count
         }
     }
     
@@ -168,6 +271,45 @@ struct TrackableGridItem: View {
             .cornerRadius(12)
         }
         .buttonStyle(.plain)
+    }
+}
+
+struct AdvancedTrackableGridItem: View {
+    let trackable: Trackable
+    let count: Int
+    let onIncrement: () -> Void
+    let onDecrement: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(trackable.name)
+                .font(.headline)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+            
+            Text("\(count)")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundStyle(.orange)
+            
+            HStack(spacing: 24) {
+                Button(action: onDecrement) {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(count > 0 ? .orange : .secondary)
+                }
+                .disabled(count == 0)
+                
+                Button(action: onIncrement) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(.orange)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 140)
+        .background(Color.orange.opacity(0.1))
+        .cornerRadius(12)
     }
 }
 

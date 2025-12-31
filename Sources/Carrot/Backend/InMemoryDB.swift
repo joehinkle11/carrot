@@ -73,6 +73,21 @@ class InMemoryDB: DatabaseProtocol {
         }
     }
     
+    func decrementCount(trackableId: Int64, date: String) throws -> Count {
+        if let existing = try getCount(trackableId: trackableId, date: date) {
+            let newCountValue = max(0, existing.count - 1)
+            let updated = Count(id: existing.id, date: date, trackableId: trackableId, count: newCountValue)
+            counts[existing.id] = updated
+            return updated
+        } else {
+            let id = nextCountId
+            nextCountId += 1
+            let newCount = Count(id: id, date: date, trackableId: trackableId, count: 0)
+            counts[id] = newCount
+            return newCount
+        }
+    }
+    
     func setCount(trackableId: Int64, date: String, count: Int) throws -> Count {
         if let existing = try getCount(trackableId: trackableId, date: date) {
             let updated = Count(id: existing.id, date: date, trackableId: trackableId, count: count)
