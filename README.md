@@ -20,6 +20,12 @@ Carrot just asks: *How many times did you do the thing today?*
 
 No timestamps. No notes. No guilt. Just counts.
 
+## Download
+
+iOS TestFlight link: https://testflight.apple.com/join/zz62H8P3
+
+APK available on GitHub release: todo
+
 ## Features
 
 - 📊 **Track** — Tap to count. Navigate between days.
