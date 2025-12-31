@@ -459,12 +459,13 @@ struct HistoryEntry: Identifiable {
     let count: Int
 }
 
+@MainActor var csvContent = ""
+
 struct HistoryView: View {
     @State var trackables: [Trackable] = []
     @State var selectedTrackable: Trackable? = nil
     @State var historyEntries: [HistoryEntry] = []
     @State var showingExportSheet = false
-    @State var csvContent: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -542,7 +543,6 @@ struct HistoryView: View {
         }
         .sheet(isPresented: $showingExportSheet) {
             CSVExportSheet(
-                csvContent: csvContent,
                 trackableName: selectedTrackable?.name ?? "Export"
             )
         }
@@ -692,7 +692,6 @@ struct HistoryView: View {
 // MARK: - CSV Export Sheet
 
 struct CSVExportSheet: View {
-    let csvContent: String
     let trackableName: String
     @Environment(\.dismiss) var dismiss
     @State var copied = false
@@ -701,12 +700,10 @@ struct CSVExportSheet: View {
         NavigationStack {
             VStack(spacing: 0) {
                 // CSV content in scrollable text view
-                ScrollView {
-                    Text(csvContent)
-                        .font(.system(.caption, design: .monospaced))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                }
+                TextEditor(text: .constant(csvContent))
+                    .font(.system(.caption, design: .monospaced))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
                 .background(Color.secondary.opacity(0.1))
                 
                 // Copy button at bottom
@@ -714,7 +711,7 @@ struct CSVExportSheet: View {
                     copyToClipboard()
                 } label: {
                     HStack {
-                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                        Image(systemName: copied ? "checkmark" : "square.and.arrow.up")
                         Text(copied ? "Copied!" : "Copy CSV")
                     }
                     .font(.headline)
@@ -741,15 +738,7 @@ struct CSVExportSheet: View {
     }
     
     func copyToClipboard() {
-        #if os(iOS)
         UIPasteboard.general.string = csvContent
-        #elseif os(macOS)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(csvContent, forType: .string)
-        #else
-        // Android: Skip framework handles clipboard differently
-        // For now, just show the copied state
-        #endif
         
         copied = true
         
