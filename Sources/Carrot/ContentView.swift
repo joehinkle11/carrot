@@ -9,8 +9,12 @@ enum ContentTab: String, Hashable {
 enum Constants {
     #if os(iOS)
     static let minusCircleFill = "minus.circle.fill"
+    static let advancedToggleIcon = "plusminus.circle"
+    static let advancedToggleIconFill = "plusminus.circle.fill"
     #else
     static let minusCircleFill = "Icons.Outlined.RemoveCircle"
+    static let advancedToggleIcon = "Icons.Outlined.UnfoldMore"
+    static let advancedToggleIconFill = "Icons.Filled.UnfoldMore"
     #endif
 }
 
@@ -133,17 +137,6 @@ struct TrackView: View {
             .padding(.vertical, 8)
             .background(Color.orange.opacity(0.05))
             
-            // Advanced mode toggle
-            HStack {
-                Toggle(isOn: $isAdvancedMode) {
-                    Text("Advanced Mode")
-                        .font(.subheadline)
-                }
-                .tint(.orange)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-            
             // Content
             Group {
                 if trackables.isEmpty {
@@ -181,6 +174,17 @@ struct TrackView: View {
         }
         .onAppear {
             refreshData()
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    isAdvancedMode.toggle()
+                } label: {
+                    Image(systemName: isAdvancedMode ? Constants.advancedToggleIconFill : Constants.advancedToggleIcon)
+                        .font(.title3)
+                        .foregroundStyle(isAdvancedMode ? .orange : .secondary)
+                }
+            }
         }
     }
     
