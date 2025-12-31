@@ -1,7 +1,22 @@
-# Carrot
+# Carrot 🥕
 
-This is a free [Skip](https://skip.tools) dual-platform app project.
-It builds a native app for both iOS and Android.
+<p align="center">
+  <img src="https://github.com/joehinkle11/carrot/blob/main/Sources/Carrot/Resources/Module.xcassets/carrot.imageset/carrot.png?raw=true" alt="Carrot Logo" width="200"/>
+</p>
+
+A simple, cross-platform habit tracker app built with [Skip](https://skip.tools) for iOS and Android.
+
+## Screenshots
+
+<!-- TODO: Add screenshots -->
+
+## Features
+
+- **Track Page** - View all your trackables in a grid. Tap to log an occurrence for the day.
+- **Goals/Habits Page** - Create, rename, and delete habits or goals you want to track.
+- **History Page** - View your tracking history with day-by-day counts. Export to CSV.
+
+All data is stored locally on your device using SQLite.
 
 ## Building
 
@@ -17,16 +32,6 @@ Kotlin, Gradle, and the Android build tools.
 
 Installation prerequisites can be confirmed by running `skip checkup`.
 
-## Testing
-
-The module can be tested using the standard `swift test` command
-or by running the test target for the macOS destination in Xcode,
-which will run the Swift tests as well as the transpiled
-Kotlin JUnit tests in the Robolectric Android simulation environment.
-
-Parity testing can be performed with `skip test`,
-which will output a table of the test results for both platforms.
-
 ## Running
 
 Xcode and Android Studio must be downloaded and installed in order to
@@ -36,10 +41,14 @@ Android Studio's Device Manager.
 
 To run both the Swift and Kotlin apps simultaneously,
 launch the Carrot target from Xcode.
-A build phases runs the "Launch Android APK" script that
-will deploy the transpiled app a running Android emulator or connected device.
+A build phase runs the "Launch Android APK" script that
+will deploy the transpiled app to a running Android emulator or connected device.
 Logging output for the iOS app can be viewed in the Xcode console, and in
 Android Studio's logcat tab for the transpiled Kotlin app.
+
+## Author
+
+Created by Joseph Hinkle on December 31st, 2025.
 
 ## License
 
