@@ -527,6 +527,7 @@ struct HistoryEntry: Identifiable {
 }
 
 @MainActor var csvContent = ""
+@MainActor var allCSVContent = ""
 
 struct HistoryView: View {
     @State var trackables: [Trackable] = []
@@ -534,6 +535,7 @@ struct HistoryView: View {
     @State var historyEntries: [HistoryEntry] = []
     @State var showingExportSheet = false
     @State var showingInfoSheet = false
+    @State var showingExportAllSheet = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -619,7 +621,22 @@ struct HistoryView: View {
         }
         .sheet(isPresented: $showingExportSheet) {
             CSVExportSheet(
-                trackableName: selectedTrackable?.name ?? "Export"
+                trackableName: selectedTrackable?.name ?? "Export",
+                isExportingAll: false,
+                onExportAll: {
+                    generateAllCSV()
+                    showingExportSheet = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showingExportAllSheet = true
+                    }
+                }
+            )
+        }
+        .sheet(isPresented: $showingExportAllSheet) {
+            CSVExportSheet(
+                trackableName: "All Categories",
+                isExportingAll: true,
+                onExportAll: nil
             )
         }
         .sheet(isPresented: $showingInfoSheet) {
@@ -644,6 +661,54 @@ struct HistoryView: View {
         }
         
         csvContent = lines.joined(separator: "\n")
+    }
+    
+    func generateAllCSV() {
+        guard !trackables.isEmpty else {
+            allCSVContent = ""
+            return
+        }
+        
+        // Build header with all trackable names
+        var header = "Date"
+        for trackable in trackables {
+            // Escape trackable names that might contain commas
+            let escapedName = trackable.name.contains(",") ? "\"\(trackable.name)\"" : trackable.name
+            header += ",\(escapedName)"
+        }
+        
+        var lines: [String] = [header]
+        
+        // Collect all counts for all trackables
+        var countsByTrackableAndDate: [Int64: [String: Int]] = [:]
+        for trackable in trackables {
+            let counts = BackendService.shared.getAllCounts(trackableId: trackable.id)
+            var countsByDate: [String: Int] = [:]
+            for count in counts {
+                countsByDate[count.date] = count.count
+            }
+            countsByTrackableAndDate[trackable.id] = countsByDate
+        }
+        
+        // Generate entries for the last 30 days
+        let calendar = Calendar.current
+        let today = Date()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        for dayOffset in 0..<30 {
+            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
+            let dateString = dateFormatter.string(from: date)
+            
+            var row = dateString
+            for trackable in trackables {
+                let count = countsByTrackableAndDate[trackable.id]?[dateString] ?? 0
+                row += ",\(count)"
+            }
+            lines.append(row)
+        }
+        
+        allCSVContent = lines.joined(separator: "\n")
     }
     
     func loadTrackables() {
@@ -772,37 +837,78 @@ struct HistoryView: View {
 
 struct CSVExportSheet: View {
     let trackableName: String
+    let isExportingAll: Bool
+    let onExportAll: (() -> Void)?
     @Environment(\.dismiss) var dismiss
     @State var copied = false
+    
+    /// Returns the appropriate CSV content based on export mode
+    private var currentCSVContent: String {
+        isExportingAll ? allCSVContent : csvContent
+    }
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Export indicator
+                HStack {
+                    Image(isExportingAll ? "name" : "carrotsmall")
+                        .foregroundStyle(.orange)
+                    Text(isExportingAll ? "Exporting all categories" : "Exporting: \(trackableName)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 10)
+                .background(Color.orange.opacity(0.1))
+                
                 // CSV content in scrollable text view
-                TextEditor(text: .constant(csvContent))
+                TextEditor(text: .constant(currentCSVContent))
                     .font(.system(.caption, design: .monospaced))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
                 .background(Color.secondary.opacity(0.1))
                 
-                // Copy button at bottom
-                Button {
-                    copyToClipboard()
-                } label: {
-                    HStack {
-                        Image(systemName: copied ? "checkmark" : "square.and.arrow.up")
-                        Text(copied ? "Copied!" : "Copy CSV")
+                // Buttons at bottom
+                VStack(spacing: 12) {
+                    // Copy button
+                    Button {
+                        copyToClipboard()
+                    } label: {
+                        HStack {
+                            Image(systemName: copied ? "checkmark" : "square.and.arrow.up")
+                            Text(copied ? "Copied!" : "Copy CSV")
+                        }
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(copied ? Color.green : Color.orange)
+                        .cornerRadius(12)
                     }
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(copied ? Color.green : Color.orange)
-                    .cornerRadius(12)
+                    
+                    // Export All button (only shown for single trackable export)
+                    if !isExportingAll, let exportAll = onExportAll {
+                        Button {
+                            exportAll()
+                        } label: {
+                            HStack {
+                                Image(systemName: "square.grid.2x2")
+                                Text("Export All Categories")
+                            }
+                            .font(.headline)
+                            .foregroundStyle(.orange)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.orange.opacity(0.15))
+                            .cornerRadius(12)
+                        }
+                    }
                 }
                 .padding()
             }
-            .navigationTitle("\(trackableName) Export")
+            .navigationTitle(isExportingAll ? "All Categories Export" : "\(trackableName) Export")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -818,7 +924,7 @@ struct CSVExportSheet: View {
     
     func copyToClipboard() {
         #if !os(macOS)
-        UIPasteboard.general.string = csvContent
+        UIPasteboard.general.string = currentCSVContent
         #endif
         
         copied = true
