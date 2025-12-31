@@ -81,4 +81,6 @@ Requirements
 
 Requirements
 [] in the 3rd tab, user should be able to export to CSV
+[] csv is shared as a single text view which is scrollable on a sheet
+[] copy button for csv contents
 [] `swift build` succeeds
