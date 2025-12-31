@@ -74,3 +74,11 @@ Requirements
 [] top of screeen on first tab say the current day. left and right arrows allow them to change it but it defaults to the current day
 [] a toggle on the first screen changes to "advanced" mode where the user doesnt' click anyonewehre on the grid icon, but instead has a + and - icon on each grid item to have more control
 [] `swift build` succeeds
+
+
+
+# Milestone 10 - export support
+
+Requirements
+[] in the 3rd tab, user should be able to export to CSV
+[] `swift build` succeeds
