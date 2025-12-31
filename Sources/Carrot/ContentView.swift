@@ -34,8 +34,9 @@ struct ContentView: View {
                 Label {
                     Text("Goals")
                 } icon: {
-                    Image("carrot", bundle: .module)
+                    Image("carrotsmall", bundle: .module)
                         .resizable()
+                        .scaledToFit()
                         .frame(width: 24, height: 24)
                 }
             }
@@ -45,7 +46,15 @@ struct ContentView: View {
                 HistoryView()
                     .navigationTitle("History")
             }
-            .tabItem { Label("History", systemImage: "chart.bar.fill") }
+            .tabItem {
+                Label {
+                    Text("History")
+                } icon: {
+                    Image("grid", bundle: .module)
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
+            }
             .tag(ContentTab.history)
         }
     }
@@ -265,6 +274,7 @@ struct GoalsView: View {
             
             Image("carrot", bundle: .module)
                 .resizable()
+                .scaledToFit()
                 .frame(width: 100, height: 100)
             
             Text("Goals & Habits")
