@@ -46,3 +46,23 @@ Then open in Xcode and hit run. Works on iOS and Android.
 ---
 
 Made by **Joseph Hinkle** • Dec 31, 2025 • [GPL-2.0-or-later](https://spdx.org/licenses/GPL-2.0-or-later.html)
+
+## Change History
+
+### 1.0.0
+
+Basic MVP working:
+- 📊 **Track Tab** — Tap habits to log counts for the day
+- 📅 **Date Navigation** — Left/right arrows to navigate between days
+- ⚙️ **Advanced Mode** — Toggle +/- buttons for precise count control
+- 🥕 **Goals Tab** — Add, rename, and delete habits/goals
+- 📈 **History Tab** — View 30-day history per trackable
+- 📤 **CSV Export** — Export history with copy button
+- ℹ️ **App Info** — Info sheet with version and creator
+- 💾 **Local SQLite** — All data persisted locally
+- 📱 **Cross-Platform** — iOS and Android via Skip
+
+### 1.0.1
+
+- Bug fixes
+  - fixed dark mode icon

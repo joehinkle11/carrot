@@ -32,6 +32,7 @@ struct ContentView: View {
                     Text("Track")
                 } icon: {
                     Image("grid", bundle: .module)
+                        .renderingMode(.template)
                         .resizable()
                         .frame(width: 24, height: 24)
                 }
@@ -63,6 +64,7 @@ struct ContentView: View {
                     Text("History")
                 } icon: {
                     Image("chart", bundle: .module)
+                        .renderingMode(.template)
                         .resizable()
                         .frame(width: 24, height: 24)
                 }
@@ -237,8 +239,10 @@ struct TrackView: View {
             Spacer()
             
             Image("grid", bundle: .module)
+                .renderingMode(.template)
                 .resizable()
                 .frame(width: 100, height: 100)
+                .foregroundStyle(.secondary)
             
             Text("Your Trackables")
                 .font(.title2)
