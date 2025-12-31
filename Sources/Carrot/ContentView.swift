@@ -12,9 +12,9 @@ enum Constants {
     static let advancedToggleIcon = "plusminus.circle"
     static let advancedToggleIconFill = "plusminus.circle.fill"
     #else
-    static let minusCircleFill = "Icons.Outlined.RemoveCircle"
-    static let advancedToggleIcon = "Icons.Outlined.UnfoldMore"
-    static let advancedToggleIconFill = "Icons.Filled.UnfoldMore"
+    static let minusCircleFill = "arrowtriangle.down.fill"
+    static let advancedToggleIcon = "info.circle"
+    static let advancedToggleIconFill = "info.circle.fill"
     #endif
 }
 
