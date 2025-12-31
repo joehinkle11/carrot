@@ -78,16 +78,49 @@ struct ContentView: View {
 struct TrackView: View {
     @State var trackables: [Trackable] = []
     @State var dayCounts: [Int64: Int] = [:]  // trackableId -> count
-    @State var selectedDate: Date = Date()
+    @State var selectedDate: Date = TrackView.defaultSelectedDate()
     @State var isAdvancedMode: Bool = false
+    @State var showingSleepConfirmation: Bool = false
     
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
     
+    /// Checks if the current time is in the "late night" window (12AM-5AM)
+    /// During this time, users are likely still in the previous day's waking cycle
+    private var isLateNightWindow: Bool {
+        let hour = Calendar.current.component(.hour, from: Date())
+        return hour >= 0 && hour < 5
+    }
+    
+    /// Returns the appropriate default date based on the current time
+    /// If between 12AM-5AM, returns yesterday as users are likely still in that waking cycle
+    static func defaultSelectedDate() -> Date {
+        let now = Date()
+        let hour = Calendar.current.component(.hour, from: now)
+        if hour >= 0 && hour < 5 {
+            // Late night window - default to previous day
+            return Calendar.current.date(byAdding: .day, value: -1, to: now) ?? now
+        }
+        return now
+    }
+    
     private var isToday: Bool {
         Calendar.current.isDateInToday(selectedDate)
+    }
+    
+    /// Checks if the selected date is the "effective today" considering late night window
+    /// During late night (12AM-5AM), "today" for tracking purposes is actually yesterday
+    private var isEffectiveToday: Bool {
+        if isLateNightWindow {
+            // In late night window, the effective "today" is yesterday
+            guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else {
+                return isToday
+            }
+            return Calendar.current.isDate(selectedDate, inSameDayAs: yesterday)
+        }
+        return isToday
     }
     
     private var formattedDate: String {
@@ -125,7 +158,7 @@ struct TrackView: View {
                 Spacer()
                 
                 Button {
-                    goToNextDay()
+                    handleNextDayTap()
                 } label: {
                     Image(systemName: "chevron.right")
                         .font(.title2)
@@ -138,6 +171,17 @@ struct TrackView: View {
             .padding(.horizontal)
             .padding(.vertical, 8)
             .background(Color.orange.opacity(0.05))
+            .alert("Did you already sleep?", isPresented: $showingSleepConfirmation) {
+                Button("No, still awake", role: .cancel) {
+                    // Cancel the forward action - user is still in previous day's waking cycle
+                }
+                Button("Yes, I slept") {
+                    // User has slept, allow moving to the new day
+                    forceGoToNextDay()
+                }
+            } message: {
+                Text("It's late night hours. Carrot tracks your habits by waking cycle, not by the clock. If you haven't slept yet, you're probably still logging for yesterday.")
+            }
             
             // Content
             Group {
@@ -197,7 +241,26 @@ struct TrackView: View {
         }
     }
     
-    func goToNextDay() {
+    /// Handles tap on the next day button
+    /// Shows confirmation during late night hours when moving from the "effective today" to actual today
+    func handleNextDayTap() {
+        guard let newDate = Calendar.current.date(byAdding: .day, value: 1, to: selectedDate) else { return }
+        guard newDate <= Date() else { return }
+        
+        // Check if we're in late night window and trying to move from yesterday to today
+        if isLateNightWindow && Calendar.current.isDateInToday(newDate) {
+            // Show confirmation dialog
+            showingSleepConfirmation = true
+        } else {
+            // Normal navigation
+            selectedDate = newDate
+            refreshData()
+        }
+    }
+    
+    /// Forces navigation to next day without confirmation
+    /// Used when user confirms they have already slept
+    func forceGoToNextDay() {
         if let newDate = Calendar.current.date(byAdding: .day, value: 1, to: selectedDate) {
             if newDate <= Date() {
                 selectedDate = newDate
