@@ -59,7 +59,7 @@ struct TrackView: View {
             
             Text("Add habits in the Goals tab to get started")
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.secondary)
                 .padding(.bottom, 16)
         }
     }
