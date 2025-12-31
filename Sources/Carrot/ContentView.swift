@@ -38,18 +38,57 @@ struct ContentView: View {
 // MARK: - Track View
 struct TrackView: View {
     @State var trackables: [Trackable] = []
+    @State var todayCounts: [Int64: Int] = [:]  // trackableId -> count
+    
+    private let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
     
     var body: some View {
         Group {
             if trackables.isEmpty {
                 emptyStateView
             } else {
-                Text("\(trackables.count) trackables loaded")
-                    .foregroundStyle(.secondary)
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(trackables) { trackable in
+                            TrackableGridItem(
+                                trackable: trackable,
+                                count: todayCounts[trackable.id] ?? 0,
+                                onTap: {
+                                    incrementCount(for: trackable)
+                                }
+                            )
+                        }
+                    }
+                    .padding()
+                }
             }
         }
-        .task {
-            trackables = BackendService.shared.getAllTrackables()
+        .onAppear {
+            refreshData()
+        }
+    }
+    
+    func refreshData() {
+        trackables = BackendService.shared.getAllTrackables()
+        let today = BackendService.shared.todayString()
+        var counts: [Int64: Int] = [:]
+        for trackable in trackables {
+            if let count = BackendService.shared.getCount(trackableId: trackable.id, date: today) {
+                counts[trackable.id] = count.count
+            } else {
+                counts[trackable.id] = 0
+            }
+        }
+        todayCounts = counts
+    }
+    
+    func incrementCount(for trackable: Trackable) {
+        let today = BackendService.shared.todayString()
+        if let newCount = BackendService.shared.incrementCount(trackableId: trackable.id, date: today) {
+            todayCounts[trackable.id] = newCount.count
         }
     }
     
@@ -81,11 +120,39 @@ struct TrackView: View {
     }
 }
 
+struct TrackableGridItem: View {
+    let trackable: Trackable
+    let count: Int
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 8) {
+                Text(trackable.name)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                
+                Text("\(count)")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.orange)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 120)
+            .background(Color.orange.opacity(0.1))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 // MARK: - Goals View
 struct GoalsView: View {
     @State var trackables: [Trackable] = []
     @State var showingAddAlert = false
+    @State var showingRenameAlert = false
     @State var newTrackableName = ""
+    @State var trackableToEdit: Trackable? = nil
     
     var body: some View {
         Group {
@@ -94,8 +161,21 @@ struct GoalsView: View {
             } else {
                 List {
                     ForEach(trackables) { trackable in
-                        Text(trackable.name)
+                        HStack {
+                            Text(trackable.name)
+                            Spacer()
+                            Button {
+                                trackableToEdit = trackable
+                                newTrackableName = trackable.name
+                                showingRenameAlert = true
+                            } label: {
+                                Image(systemName: "pencil")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
+                    .onDelete(perform: deleteTrackables)
                 }
             }
         }
@@ -118,7 +198,18 @@ struct GoalsView: View {
         } message: {
             Text("Enter a name for your new habit or goal")
         }
-        .task {
+        .alert("Rename", isPresented: $showingRenameAlert) {
+            TextField("Name", text: $newTrackableName)
+            Button("Cancel", role: .cancel) {
+                trackableToEdit = nil
+            }
+            Button("Save") {
+                renameTrackable()
+            }
+        } message: {
+            Text("Enter a new name")
+        }
+        .onAppear {
             trackables = BackendService.shared.getAllTrackables()
         }
     }
@@ -130,6 +221,26 @@ struct GoalsView: View {
         if let _ = BackendService.shared.createTrackable(name: name) {
             trackables = BackendService.shared.getAllTrackables()
         }
+    }
+    
+    func renameTrackable() {
+        guard let trackable = trackableToEdit else { return }
+        let name = newTrackableName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        
+        let updated = Trackable(id: trackable.id, name: name)
+        if BackendService.shared.updateTrackable(updated) {
+            trackables = BackendService.shared.getAllTrackables()
+        }
+        trackableToEdit = nil
+    }
+    
+    func deleteTrackables(at offsets: IndexSet) {
+        for index in offsets {
+            let trackable = trackables[index]
+            let _ = BackendService.shared.deleteTrackable(id: trackable.id)
+        }
+        trackables = BackendService.shared.getAllTrackables()
     }
     
     private var emptyStateView: some View {
