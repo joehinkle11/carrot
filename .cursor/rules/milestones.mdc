@@ -42,14 +42,14 @@ Requirements
 [] `swift build` succeeds
 
 
-# Milestone 5 - sql backend
+# Milestone 6 - sql backend
 
 Requirements
 [] service layer now uses skipsql to persist data and we remove the old in memory db
 [] `swift build` succeeds
 
 
-# Milestone 5 - third tab
+# Milestone 7 - third tab
 
 Requirements
 [] 3rd tab now shows simple horizontal scrolling button list at the top, one button per trackable
@@ -58,7 +58,7 @@ Requirements
 [] `swift build` succeeds
 
 
-# Milestone 6 - styling
+# Milestone 8 - styling
 
 work closly with tech lead for this (one prompting cursor)
 
