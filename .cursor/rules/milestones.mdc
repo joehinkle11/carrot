@@ -103,3 +103,11 @@ Requirements
 [] when the user is between the hours of 12AM and 5AM, assume they are logging for the previous day in the first tab, but still allow them to manually click the forward arrow to log the next day (i.e. in case they just woke up very early at like 4am that day)
 [] when clicking the forward arrow in that 12-5 range, show a modal which asks them "did you already sleep?" or "did you just wake up?" or something with a little explainer about how they should log based on their sleep wake cycle, not on the day hour cycle. if they say "no", then cancel the forward action. if "yes, i slept", then allow the forward move
 [] `swift build` succeeds
+
+
+# Milestone 13 - Allow exporting all trackables into one csv
+
+Requirements
+[] when exporting, there is an indicator on the sheet saying you are exporting just that column
+[] when  exporting, there is another button which says "export all categories" which opens another sheet (reuse view component) (export all button shouldn't be present on that secondary sheet)
+[] `swift build` succeeds
