@@ -173,27 +173,8 @@ struct EditTrackableSheet: View {
                 }
                 
                 Section("Color") {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 12) {
-                        ForEach(trackableColorPalette, id: \.self) { hexColor in
-                            Button {
-                                color = hexColor
-                            } label: {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color(hex: hexColor) ?? .orange)
-                                        .frame(width: 40, height: 40)
-                                    
-                                    if color == hexColor {
-                                        Image(systemName: "checkmark")
-                                            .font(.headline)
-                                            .foregroundStyle(.white)
-                                    }
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 8)
+                    ColorPaletteGrid(selectedColor: $color)
+                        .padding(.vertical, 8)
                 }
             }
             .navigationTitle("Edit Goal")
@@ -207,6 +188,54 @@ struct EditTrackableSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save", action: onSave)
                         .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Color Palette Grid
+
+/// A simple grid of color options that works on both iOS and Android
+struct ColorPaletteGrid: View {
+    @Binding var selectedColor: String
+    
+    // Split palette into rows of 5
+    private var colorRows: [[String]] {
+        var rows: [[String]] = []
+        var currentRow: [String] = []
+        for (index, color) in trackableColorPalette.enumerated() {
+            currentRow.append(color)
+            if currentRow.count == 5 || index == trackableColorPalette.count - 1 {
+                rows.append(currentRow)
+                currentRow = []
+            }
+        }
+        return rows
+    }
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            ForEach(Array(colorRows.enumerated()), id: \.offset) { _, row in
+                HStack(spacing: 12) {
+                    ForEach(row, id: \.self) { hexColor in
+                        Button {
+                            selectedColor = hexColor
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(hex: hexColor) ?? .orange)
+                                    .frame(width: 40, height: 40)
+                                
+                                if selectedColor == hexColor {
+                                    Image(systemName: "checkmark")
+                                        .font(.headline)
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
