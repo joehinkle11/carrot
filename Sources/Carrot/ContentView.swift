@@ -6,18 +6,6 @@ enum ContentTab: String, Hashable {
     case track, goals, history
 }
 
-enum Constants {
-    #if os(iOS)
-    static let minusCircleFill = "minus.circle.fill"
-    static let advancedToggleIcon = "plusminus.circle"
-    static let advancedToggleIconFill = "plusminus.circle.fill"
-    #else
-    static let minusCircleFill = "arrowtriangle.down.fill"
-    static let advancedToggleIcon = "info.circle"
-    static let advancedToggleIconFill = "info.circle.fill"
-    #endif
-}
-
 struct ContentView: View {
     @AppStorage("tab") var tab = ContentTab.track
 

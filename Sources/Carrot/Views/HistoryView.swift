@@ -2,16 +2,6 @@
 
 import SwiftUI
 
-struct HistoryEntry: Identifiable {
-    let id: String
-    let date: Date
-    let dateString: String
-    let day: Int
-    let month: String
-    let dayOfWeek: String
-    let count: Int
-}
-
 @MainActor var csvContent = ""
 @MainActor var allCSVContent = ""
 
@@ -470,26 +460,5 @@ struct HistoryView: View {
         }
         
         allCSVContent = lines.joined(separator: "\n")
-    }
-}
-
-// MARK: - Stat Box
-
-struct StatBox: View {
-    let title: String
-    let value: String
-    var color: Color = .orange
-    
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundStyle(color)
-        }
-        .frame(maxWidth: .infinity)
     }
 }
