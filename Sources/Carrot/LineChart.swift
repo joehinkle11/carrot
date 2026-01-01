@@ -21,13 +21,14 @@ struct LineChartView: View {
     init(
         dataPoints: [ChartDataPoint],
         lineColor: Color = .orange,
-        fillColor: Color = .orange.opacity(0.2),
+        fillColor: Color? = nil,
         showLabels: Bool = true
     ) {
         // Sort by date ascending for proper line drawing
         self.dataPoints = dataPoints.sorted { $0.date < $1.date }
         self.lineColor = lineColor
-        self.fillColor = fillColor
+        // Use provided fillColor or derive from lineColor
+        self.fillColor = fillColor ?? lineColor.opacity(0.2)
         self.showLabels = showLabels
     }
     

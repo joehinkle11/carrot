@@ -21,14 +21,19 @@ class SQLDatabase: DatabaseProtocol {
         
         // Create tables if they don't exist
         try createTables()
+        
+        // Run migrations for existing databases
+        try migrateDatabase()
     }
     
     private func createTables() throws {
-        // Create trackables table
+        // Create trackables table with color and order columns
         try db.exec(sql: """
             CREATE TABLE IF NOT EXISTS trackables (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                color TEXT NOT NULL DEFAULT '#FF9500',
+                sort_order INTEGER NOT NULL DEFAULT -1
             )
         """)
         
@@ -45,29 +50,56 @@ class SQLDatabase: DatabaseProtocol {
         """)
     }
     
+    private func migrateDatabase() throws {
+        // Check if color column exists in trackables
+        let columns = try db.selectAll(sql: "PRAGMA table_info(trackables)")
+        let columnNames = columns.compactMap { $0[1].textValue }
+        
+        // Add color column if it doesn't exist
+        if !columnNames.contains("color") {
+            try db.exec(sql: "ALTER TABLE trackables ADD COLUMN color TEXT NOT NULL DEFAULT '#FF9500'")
+        }
+        
+        // Add sort_order column if it doesn't exist
+        if !columnNames.contains("sort_order") {
+            try db.exec(sql: "ALTER TABLE trackables ADD COLUMN sort_order INTEGER NOT NULL DEFAULT -1")
+        }
+    }
+    
     // MARK: - Trackables
     
     func getAllTrackables() throws -> [Trackable] {
-        let rows = try db.selectAll(sql: "SELECT id, name FROM trackables ORDER BY id")
+        // Order by sort_order first, then by id for stable sorting
+        let rows = try db.selectAll(sql: "SELECT id, name, color, sort_order FROM trackables ORDER BY sort_order ASC, id ASC")
         return rows.map { row in
             Trackable(
                 id: row[0].integerValue ?? 0,
-                name: row[1].textValue ?? ""
+                name: row[1].textValue ?? "",
+                color: row[2].textValue ?? defaultTrackableColor,
+                order: Int(row[3].integerValue ?? -1)
             )
         }
     }
     
-    func createTrackable(name: String) throws -> Trackable {
-        try db.exec(sql: "INSERT INTO trackables (name) VALUES (?)", parameters: [.text(name)])
+    func createTrackable(name: String, color: String, order: Int) throws -> Trackable {
+        try db.exec(sql: "INSERT INTO trackables (name, color, sort_order) VALUES (?, ?, ?)", 
+                   parameters: [.text(name), .text(color), .integer(Int64(order))])
         let id = db.lastInsertRowID
-        return Trackable(id: id, name: name)
+        return Trackable(id: id, name: name, color: color, order: order)
     }
     
     func updateTrackable(_ trackable: Trackable) throws {
-        try db.exec(sql: "UPDATE trackables SET name = ? WHERE id = ?", 
-                   parameters: [.text(trackable.name), .integer(trackable.id)])
+        try db.exec(sql: "UPDATE trackables SET name = ?, color = ?, sort_order = ? WHERE id = ?", 
+                   parameters: [.text(trackable.name), .text(trackable.color), .integer(Int64(trackable.order)), .integer(trackable.id)])
         if db.changes == 0 {
             throw DatabaseError.notFound
+        }
+    }
+    
+    func updateTrackableOrders(_ updates: [(id: Int64, order: Int)]) throws {
+        for update in updates {
+            try db.exec(sql: "UPDATE trackables SET sort_order = ? WHERE id = ?",
+                       parameters: [.integer(Int64(update.order)), .integer(update.id)])
         }
     }
     

@@ -6,17 +6,20 @@ import Foundation
 protocol DatabaseProtocol {
     // MARK: - Trackables
     
-    /// Get all trackables
+    /// Get all trackables sorted by order then id
     func getAllTrackables() throws -> [Trackable]
     
-    /// Create a new trackable
-    func createTrackable(name: String) throws -> Trackable
+    /// Create a new trackable with name, color and order
+    func createTrackable(name: String, color: String, order: Int) throws -> Trackable
     
-    /// Update an existing trackable
+    /// Update an existing trackable (name, color, order)
     func updateTrackable(_ trackable: Trackable) throws
     
     /// Delete a trackable by ID
     func deleteTrackable(id: Int64) throws
+    
+    /// Update the order of multiple trackables at once
+    func updateTrackableOrders(_ updates: [(id: Int64, order: Int)]) throws
     
     // MARK: - Counts
     

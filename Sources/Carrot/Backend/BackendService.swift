@@ -21,7 +21,7 @@ final class BackendService {
     
     // MARK: - Trackables API
     
-    /// Get all trackables
+    /// Get all trackables sorted by order then id
     func getAllTrackables() -> [Trackable] {
         do {
             return try database.getAllTrackables()
@@ -31,23 +31,40 @@ final class BackendService {
         }
     }
     
-    /// Create a new trackable with the given name
+    /// Create a new trackable with the given name and a random color
     func createTrackable(name: String) -> Trackable? {
+        let color = randomTrackableColor()
+        return createTrackable(name: name, color: color, order: -1)
+    }
+    
+    /// Create a new trackable with name, color and order
+    func createTrackable(name: String, color: String, order: Int) -> Trackable? {
         do {
-            return try database.createTrackable(name: name)
+            return try database.createTrackable(name: name, color: color, order: order)
         } catch {
             logger.error("Failed to create trackable: \(error)")
             return nil
         }
     }
     
-    /// Update an existing trackable
+    /// Update an existing trackable (name, color, order)
     func updateTrackable(_ trackable: Trackable) -> Bool {
         do {
             try database.updateTrackable(trackable)
             return true
         } catch {
             logger.error("Failed to update trackable: \(error)")
+            return false
+        }
+    }
+    
+    /// Update the order of multiple trackables at once
+    func updateTrackableOrders(_ updates: [(id: Int64, order: Int)]) -> Bool {
+        do {
+            try database.updateTrackableOrders(updates)
+            return true
+        } catch {
+            logger.error("Failed to update trackable orders: \(error)")
             return false
         }
     }

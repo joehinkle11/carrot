@@ -8,6 +8,7 @@ struct TrackView: View {
     @State var selectedDate: Date = TrackView.defaultSelectedDate()
     @State var isAdvancedMode: Bool = false
     @State var showingSleepConfirmation: Bool = false
+    @Environment(\.scenePhase) var scenePhase
     
     private let columns = [
         GridItem(.flexible()),
@@ -62,6 +63,13 @@ struct TrackView: View {
         }
         .onAppear {
             refreshData()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                // Reset to current day when app becomes active
+                selectedDate = TrackView.defaultSelectedDate()
+                refreshData()
+            }
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -130,10 +138,12 @@ struct TrackView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(trackables) { trackable in
+                    let trackableColor = Color(hex: trackable.color) ?? .orange
                     if isAdvancedMode {
                         AdvancedTrackableGridItem(
                             trackable: trackable,
                             count: dayCounts[trackable.id] ?? 0,
+                            color: trackableColor,
                             onIncrement: { incrementCount(for: trackable) },
                             onDecrement: { decrementCount(for: trackable) }
                         )
@@ -141,6 +151,7 @@ struct TrackView: View {
                         TrackableGridItem(
                             trackable: trackable,
                             count: dayCounts[trackable.id] ?? 0,
+                            color: trackableColor,
                             onTap: { incrementCount(for: trackable) }
                         )
                     }
@@ -241,6 +252,7 @@ struct TrackView: View {
 struct TrackableGridItem: View {
     let trackable: Trackable
     let count: Int
+    let color: Color
     let onTap: () -> Void
     
     var body: some View {
@@ -253,11 +265,11 @@ struct TrackableGridItem: View {
                 
                 Text("\(count)")
                     .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(color)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 120)
-            .background(Color.orange.opacity(0.1))
+            .background(color.opacity(0.1))
             .cornerRadius(12)
         }
         .buttonStyle(.plain)
@@ -267,6 +279,7 @@ struct TrackableGridItem: View {
 struct AdvancedTrackableGridItem: View {
     let trackable: Trackable
     let count: Int
+    let color: Color
     let onIncrement: () -> Void
     let onDecrement: () -> Void
     
@@ -279,26 +292,26 @@ struct AdvancedTrackableGridItem: View {
             
             Text("\(count)")
                 .font(.system(size: 32, weight: .bold))
-                .foregroundStyle(.orange)
+                .foregroundStyle(color)
             
             HStack(spacing: 24) {
                 Button(action: onDecrement) {
                     Image(systemName: Constants.minusCircleFill)
                         .font(.title)
-                        .foregroundStyle(count > 0 ? .orange : .secondary)
+                        .foregroundStyle(count > 0 ? color : .secondary)
                 }
                 .disabled(count == 0)
                 
                 Button(action: onIncrement) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(color)
                 }
             }
         }
         .frame(maxWidth: .infinity)
         .frame(height: 140)
-        .background(Color.orange.opacity(0.1))
+        .background(color.opacity(0.1))
         .cornerRadius(12)
     }
 }

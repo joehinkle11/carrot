@@ -16,13 +16,19 @@ class InMemoryDB: DatabaseProtocol {
     // MARK: - Trackables
     
     func getAllTrackables() throws -> [Trackable] {
-        return Array(trackables.values).sorted { $0.id < $1.id }
+        // Sort by order first, then by id for stable sorting
+        return Array(trackables.values).sorted { 
+            if $0.order != $1.order {
+                return $0.order < $1.order
+            }
+            return $0.id < $1.id
+        }
     }
     
-    func createTrackable(name: String) throws -> Trackable {
+    func createTrackable(name: String, color: String, order: Int) throws -> Trackable {
         let id = nextTrackableId
         nextTrackableId += 1
-        let trackable = Trackable(id: id, name: name)
+        let trackable = Trackable(id: id, name: name, color: color, order: order)
         trackables[id] = trackable
         return trackable
     }
@@ -32,6 +38,16 @@ class InMemoryDB: DatabaseProtocol {
             throw DatabaseError.notFound
         }
         trackables[trackable.id] = trackable
+    }
+    
+    func updateTrackableOrders(_ updates: [(id: Int64, order: Int)]) throws {
+        for update in updates {
+            guard var trackable = trackables[update.id] else {
+                throw DatabaseError.notFound
+            }
+            trackable.order = update.order
+            trackables[update.id] = trackable
+        }
     }
     
     func deleteTrackable(id: Int64) throws {

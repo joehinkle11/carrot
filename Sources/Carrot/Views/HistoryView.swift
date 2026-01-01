@@ -79,6 +79,7 @@ struct HistoryView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 ForEach(trackables) { trackable in
+                    let trackableColor = Color(hex: trackable.color) ?? .orange
                     Button {
                         selectedTrackable = trackable
                         loadHistory(for: trackable)
@@ -88,7 +89,7 @@ struct HistoryView: View {
                             .fontWeight(selectedTrackable?.id == trackable.id ? .semibold : .regular)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(selectedTrackable?.id == trackable.id ? Color.orange : Color.orange.opacity(0.1))
+                            .background(selectedTrackable?.id == trackable.id ? trackableColor : trackableColor.opacity(0.1))
                             .foregroundStyle(selectedTrackable?.id == trackable.id ? .white : .primary)
                             .cornerRadius(20)
                     }
@@ -120,7 +121,8 @@ struct HistoryView: View {
     }
     
     private var historyList: some View {
-        List {
+        let trackableColor = selectedTrackable.map { Color(hex: $0.color) ?? .orange } ?? .orange
+        return List {
             ForEach(historyEntries) { entry in
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
@@ -134,7 +136,7 @@ struct HistoryView: View {
                     Text("\(entry.count)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(entry.count > 0 ? .orange : .secondary)
+                        .foregroundStyle(entry.count > 0 ? trackableColor : .secondary)
                 }
                 .padding(.vertical, 4)
             }
@@ -278,7 +280,8 @@ struct HistoryView: View {
     }
     
     private func graphContentView(for trackable: Trackable) -> some View {
-        ScrollView {
+        let trackableColor = Color(hex: trackable.color) ?? .orange
+        return ScrollView {
             VStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(trackable.name)
@@ -296,12 +299,12 @@ struct HistoryView: View {
                         .frame(height: 200)
                         .frame(maxWidth: .infinity)
                     } else {
-                        LineChartView(dataPoints: chartDataPoints)
+                        LineChartView(dataPoints: chartDataPoints, lineColor: trackableColor)
                             .frame(height: 220)
                     }
                 }
                 .padding()
-                .background(Color.orange.opacity(0.05))
+                .background(trackableColor.opacity(0.05))
                 .cornerRadius(12)
                 
                 VStack(spacing: 12) {
@@ -312,13 +315,13 @@ struct HistoryView: View {
                     }
                     
                     HStack(spacing: 24) {
-                        StatBox(title: "Total", value: "\(totalCount)")
-                        StatBox(title: "Average", value: String(format: "%.1f", averageCount))
-                        StatBox(title: "Max", value: "\(maxCount)")
+                        StatBox(title: "Total", value: "\(totalCount)", color: trackableColor)
+                        StatBox(title: "Average", value: String(format: "%.1f", averageCount), color: trackableColor)
+                        StatBox(title: "Max", value: "\(maxCount)", color: trackableColor)
                     }
                 }
                 .padding()
-                .background(Color.orange.opacity(0.05))
+                .background(trackableColor.opacity(0.05))
                 .cornerRadius(12)
             }
             .padding()
@@ -475,6 +478,7 @@ struct HistoryView: View {
 struct StatBox: View {
     let title: String
     let value: String
+    var color: Color = .orange
     
     var body: some View {
         VStack(spacing: 4) {
@@ -484,7 +488,7 @@ struct StatBox: View {
             Text(value)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundStyle(.orange)
+                .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity)
     }
