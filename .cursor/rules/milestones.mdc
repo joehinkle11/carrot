@@ -131,3 +131,20 @@ Requirements
 [] Add a start and end date selector for changing the viewed range
 [] `swift build` succeeds
 [] `skip android build` succeeds
+
+# Milestone 16 - General improvements
+
+Requirements
+[] Trackables should have two new properties. Color (hex string) and order (num)
+[] If no order is present, just give it -1
+[] If no color is present, use orange
+[] Users should be able to track items to change order on goals page (2nd tab)
+[] Users should be able to select the color when editing a goal
+[] New goals should be auto assigned a random color
+[] SQL should migrate nice so old clients still have their old data
+[] SQL should still work for new clients
+[] When the app is opened again (i.e. not cold open, but re-opening from multitasking), and user is on the 1st tab, move the date to the current day
+[] When determining the order, use the order num in sql. If nums are the same, make it based on the id of the trackable
+[] The order should be reflected in all tabs
+[] `swift build` succeeds
+[] `skip android build` succeeds
