@@ -148,3 +148,10 @@ Requirements
 [] The order should be reflected in all tabs
 [] `swift build` succeeds
 [] `skip android build` succeeds
+
+# Milestone 17 - Edit trackable changes
+
+[] There must be an alert confirming the deletion of an trackable
+[] There must be edit toggle on the 2nd tab which allows for ordering, deleting and editing
+[] `swift build` succeeds
+[] `skip android build` succeeds

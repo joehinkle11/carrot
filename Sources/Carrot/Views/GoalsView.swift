@@ -6,10 +6,13 @@ struct GoalsView: View {
     @State var trackables: [Trackable] = []
     @State var showingAddAlert = false
     @State var showingEditSheet = false
+    @State var showingDeleteAlert = false
     @State var newTrackableName = ""
     @State var trackableToEdit: Trackable? = nil
+    @State var trackableToDelete: Trackable? = nil
     @State var editName = ""
     @State var editColor = defaultTrackableColor
+    @State var isEditMode = false
     
     var body: some View {
         Group {
@@ -21,11 +24,21 @@ struct GoalsView: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    newTrackableName = ""
-                    showingAddAlert = true
-                } label: {
-                    Image(systemName: "plus")
+                HStack(spacing: 16) {
+                    if !trackables.isEmpty {
+                        Button {
+                            isEditMode.toggle()
+                        } label: {
+                            Text(isEditMode ? "Done" : "Edit")
+                        }
+                    }
+                    
+                    Button {
+                        newTrackableName = ""
+                        showingAddAlert = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
         }
@@ -37,6 +50,20 @@ struct GoalsView: View {
             }
         } message: {
             Text("Enter a name for your new habit or goal")
+        }
+        .alert("Delete Goal?", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) {
+                trackableToDelete = nil
+            }
+            Button("Delete", role: .destructive) {
+                confirmDeleteTrackable()
+            }
+        } message: {
+            if let trackable = trackableToDelete {
+                Text("Are you sure you want to delete '\(trackable.name)'? This will also delete all associated tracking data.")
+            } else {
+                Text("Are you sure you want to delete this goal?")
+            }
         }
         .sheet(isPresented: $showingEditSheet) {
             EditTrackableSheet(
@@ -58,35 +85,59 @@ struct GoalsView: View {
     }
     
     private var trackablesList: some View {
+        Group {
+            if isEditMode {
+                editableList
+            } else {
+                readOnlyList
+            }
+        }
+    }
+    
+    private var editableList: some View {
         List {
             ForEach(trackables) { trackable in
-                HStack(spacing: 12) {
-                    Circle()
-                        .fill(Color(hex: trackable.color) ?? .orange)
-                        .frame(width: 12, height: 12)
-                    
-                    Text(trackable.name)
-                    
-                    Spacer()
-                    
-                    Button {
-                        trackableToEdit = trackable
-                        editName = trackable.name
-                        editColor = trackable.color
-                        showingEditSheet = true
-                    } label: {
-                        Image(systemName: "pencil")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
+                trackableRow(trackable: trackable, showEditButton: true)
             }
-            .onDelete(perform: deleteTrackables)
+            .onDelete(perform: requestDeleteTrackables)
             .onMove(perform: moveTrackables)
         }
         #if os(iOS)
         .environment(\.editMode, .constant(.active))
         #endif
+    }
+    
+    private var readOnlyList: some View {
+        List {
+            ForEach(trackables) { trackable in
+                trackableRow(trackable: trackable, showEditButton: false)
+            }
+        }
+    }
+    
+    private func trackableRow(trackable: Trackable, showEditButton: Bool) -> some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(Color(hex: trackable.color) ?? .orange)
+                .frame(width: 12, height: 12)
+            
+            Text(trackable.name)
+            
+            Spacer()
+            
+            if showEditButton {
+                Button {
+                    trackableToEdit = trackable
+                    editName = trackable.name
+                    editColor = trackable.color
+                    showingEditSheet = true
+                } label: {
+                    Image(systemName: "pencil")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
     
     private var emptyStateView: some View {
@@ -133,12 +184,17 @@ struct GoalsView: View {
         trackableToEdit = nil
     }
     
-    private func deleteTrackables(at offsets: IndexSet) {
-        for index in offsets {
-            let trackable = trackables[index]
-            let _ = BackendService.shared.deleteTrackable(id: trackable.id)
-        }
+    private func requestDeleteTrackables(at offsets: IndexSet) {
+        guard let index = offsets.first else { return }
+        trackableToDelete = trackables[index]
+        showingDeleteAlert = true
+    }
+    
+    private func confirmDeleteTrackable() {
+        guard let trackable = trackableToDelete else { return }
+        let _ = BackendService.shared.deleteTrackable(id: trackable.id)
         trackables = BackendService.shared.getAllTrackables()
+        trackableToDelete = nil
     }
     
     private func moveTrackables(from source: IndexSet, to destination: Int) {
