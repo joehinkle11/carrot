@@ -49,7 +49,7 @@ struct AppInfoSheet: View {
                 Text("Version")
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("1.0.1" as String)
+                Text("1.0.2" as String)
                     .fontWeight(.medium)
             }
             

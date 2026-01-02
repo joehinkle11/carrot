@@ -80,3 +80,20 @@ Basic MVP working:
   - Spanish support
 - Bug fixes
   - fixed dark mode icon
+
+
+### 1.0.2
+
+- Features
+  - Custom colors for each trackable
+  - Reorder habits/goals via drag and drop in edit mode
+  - Edit mode toggle on Goals tab for managing trackables
+  - Delete confirmation alert to prevent accidental deletions
+  - Basic tutorial for new users explaining how the app works
+  - Improved Spanish translations
+- Bug fixes
+  - Android date display fix
+  - History view improvements
+  - Android icon rendering fix
+  - Color picker fix on Android
+
