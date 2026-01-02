@@ -155,3 +155,16 @@ Requirements
 [] There must be edit toggle on the 2nd tab which allows for ordering, deleting and editing
 [] `swift build` succeeds
 [] `skip android build` succeeds
+
+
+# Milestone 18 - Basic tutorial
+
+Some users have reported confusion of how to use the app
+
+[] Explain on the 2nd if there are no goals that the user should create a goal with the _ button
+[] When they create their first goal, explain the kind of goal they should make and provide examples (i.e. you are habit tracking, not tracking exact details about things i.e. run times is not tracked. going for a run is) explain why the count system is good for this
+[] When they use the history tab and there is at least one goal with data (not all 0s) for the first time, explain the the data is ENTIRELY local (no backups). And they must export to CSV if they wish to back it up. they can sync it to google or excel sheet this way via csv
+[] If the 1st tab has no trackables, expalin to click on the goals tab to get started
+[] `swift build` succeeds
+[] `skip android build` succeeds
+
