@@ -178,8 +178,11 @@ struct HistoryView: View {
         VStack(spacing: 24) {
             Spacer()
             
-            Image(systemName: "chart.bar.fill")
-                .font(.system(size: 64))
+            Image("chart", bundle: .module)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
                 .foregroundStyle(.secondary)
             
             Text("Your History")
