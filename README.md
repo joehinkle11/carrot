@@ -28,7 +28,7 @@ No timestamps. No notes. No guilt. Just counts.
 
 iOS TestFlight link: https://testflight.apple.com/join/zz62H8P3
 
-APK available on GitHub release: https://github.com/joehinkle11/carrot/releases/download/1.0.1/app-release.apk
+APK available on GitHub release: [https://github.com/joehinkle11/carrot/releases/download/1.0.2/app-release.apk](https://github.com/joehinkle11/carrot/releases/download/1.0.2/app-release.apk)
 
 ## Features
 
