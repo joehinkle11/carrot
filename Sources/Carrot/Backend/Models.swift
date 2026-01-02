@@ -5,23 +5,27 @@ import Foundation
 /// Default orange color hex
 let defaultTrackableColor = "#FF9500"
 
-/// Predefined color palette for random assignment
+/// Predefined color palette for cycling assignment
+/// Order: Orange first, Green second, then cycle through other colors
 let trackableColorPalette: [String] = [
-    "#FF9500", // Orange
-    "#FF3B30", // Red
-    "#34C759", // Green
+    "#FF9500", // Orange (1st trackable)
+    "#34C759", // Green (2nd trackable)
     "#007AFF", // Blue
     "#AF52DE", // Purple
     "#FF2D55", // Pink
     "#5856D6", // Indigo
     "#00C7BE", // Teal
     "#FFD60A", // Yellow
+    "#FF3B30", // Red
     "#FF6B35"  // Coral
 ]
 
-/// Returns a random color from the palette
-func randomTrackableColor() -> String {
-    return trackableColorPalette.randomElement() ?? defaultTrackableColor
+/// Returns the next color in the cycle based on the current trackable count
+/// - Parameter existingCount: The number of trackables that already exist
+/// - Returns: The color for the next trackable
+func nextTrackableColor(existingCount: Int) -> String {
+    let index = existingCount % trackableColorPalette.count
+    return trackableColorPalette[index]
 }
 
 /// A trackable habit or goal

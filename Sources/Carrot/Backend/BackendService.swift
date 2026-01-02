@@ -31,9 +31,10 @@ final class BackendService {
         }
     }
     
-    /// Create a new trackable with the given name and a random color
+    /// Create a new trackable with the given name and the next color in the cycle
     func createTrackable(name: String) -> Trackable? {
-        let color = randomTrackableColor()
+        let existingCount = getAllTrackables().count
+        let color = nextTrackableColor(existingCount: existingCount)
         return createTrackable(name: name, color: color, order: -1)
     }
     
