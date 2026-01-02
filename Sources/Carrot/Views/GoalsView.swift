@@ -7,12 +7,14 @@ struct GoalsView: View {
     @State var showingAddAlert = false
     @State var showingEditSheet = false
     @State var showingDeleteAlert = false
+    @State var showingFirstGoalTutorial = false
     @State var newTrackableName = ""
     @State var trackableToEdit: Trackable? = nil
     @State var trackableToDelete: Trackable? = nil
     @State var editName = ""
     @State var editColor = defaultTrackableColor
     @State var isEditMode = false
+    @State var hadNoTrackablesBefore = false
     
     var body: some View {
         Group {
@@ -81,6 +83,13 @@ struct GoalsView: View {
         }
         .onAppear {
             trackables = BackendService.shared.getAllTrackables()
+        }
+        .alert("Welcome to Habit Tracking!", isPresented: $showingFirstGoalTutorial) {
+            Button("Got it!") {
+                TutorialManager.shared.markFirstGoalTutorialSeen()
+            }
+        } message: {
+            Text("Great job creating your first goal!\n\nTrack simple actions like \"Went for a run\" or \"Drank water\" — not detailed metrics. Each tap adds one count for the day.\n\nThis counting system helps you see patterns over time without overthinking the details.")
         }
     }
     
@@ -159,6 +168,19 @@ struct GoalsView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             
+            VStack(spacing: 12) {
+                HStack(spacing: 8) {
+                    Text("Tap the")
+                    Image(systemName: "plus")
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.orange)
+                    Text("button to add your first goal")
+                }
+                .font(.callout)
+                .foregroundStyle(.secondary)
+            }
+            .padding(.top, 8)
+            
             Spacer()
         }
     }
@@ -167,8 +189,15 @@ struct GoalsView: View {
         let name = newTrackableName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return }
         
+        let wasEmpty = trackables.isEmpty
+        
         if let _ = BackendService.shared.createTrackable(name: name) {
             trackables = BackendService.shared.getAllTrackables()
+            
+            // Show first goal tutorial if this was the first goal created
+            if wasEmpty && !trackables.isEmpty && !TutorialManager.shared.hasSeenFirstGoalTutorial {
+                showingFirstGoalTutorial = true
+            }
         }
     }
     

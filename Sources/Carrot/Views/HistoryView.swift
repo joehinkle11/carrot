@@ -12,6 +12,7 @@ struct HistoryView: View {
     @State var showingExportSheet = false
     @State var showingInfoSheet = false
     @State var showingExportAllSheet = false
+    @State var showingLocalDataTutorial = false
     @State var showGraph = false
     @State var startDate: Date = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
     @State var endDate: Date = Date()
@@ -62,6 +63,13 @@ struct HistoryView: View {
         }
         .sheet(isPresented: $showingInfoSheet) {
             AppInfoSheet()
+        }
+        .alert("Your Data is Local", isPresented: $showingLocalDataTutorial) {
+            Button("Got it!") {
+                TutorialManager.shared.markHistoryDataTutorialSeen()
+            }
+        } message: {
+            Text("All your tracking data is stored entirely on this device — there are no cloud backups.\n\nTo keep your data safe, export to CSV regularly. You can then import it into Google Sheets, Excel, or any spreadsheet app for safekeeping.")
         }
     }
     
@@ -399,6 +407,15 @@ struct HistoryView: View {
         }
         
         historyEntries = entries.reversed()
+        
+        // Check if we should show the local data tutorial
+        // Show it when user views history with at least one non-zero count for the first time
+        if !TutorialManager.shared.hasSeenHistoryDataTutorial {
+            let hasNonZeroData = historyEntries.contains { $0.count > 0 }
+            if hasNonZeroData {
+                showingLocalDataTutorial = true
+            }
+        }
     }
     
     private func generateCSV() {
