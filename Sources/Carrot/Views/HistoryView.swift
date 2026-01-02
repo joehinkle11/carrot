@@ -147,7 +147,8 @@ struct HistoryView: View {
             showGraph.toggle()
         } label: {
             #if os(iOS)
-            Image(systemName: showGraph ? "chart.line.uptrend.xyaxis.circle.fill" : "chart.line.uptrend.xyaxis.circle")
+            Label(showGraph ? "Show List" : "Show Graph", systemImage: showGraph ? "chart.line.uptrend.xyaxis.circle.fill" : "chart.line.uptrend.xyaxis.circle")
+                .labelStyle(.iconOnly)
                 .foregroundStyle(showGraph ? .orange : .secondary)
             #else
             Text(showGraph ? "Show List" : "Show Graph")
@@ -316,9 +317,9 @@ struct HistoryView: View {
                     }
                     
                     HStack(spacing: 24) {
-                        StatBox(title: "Total", value: "\(totalCount)", color: trackableColor)
-                        StatBox(title: "Average", value: String(format: "%.1f", averageCount), color: trackableColor)
-                        StatBox(title: "Max", value: "\(maxCount)", color: trackableColor)
+                        StatBox(title: LocalizedStringKey("Total"), value: "\(totalCount)", color: trackableColor)
+                        StatBox(title: LocalizedStringKey("Average"), value: String(format: "%.1f", averageCount), color: trackableColor)
+                        StatBox(title: LocalizedStringKey("Max"), value: "\(maxCount)", color: trackableColor)
                     }
                 }
                 .padding()
