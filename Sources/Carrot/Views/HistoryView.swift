@@ -358,7 +358,24 @@ struct HistoryView: View {
     
     private func loadTrackables() {
         trackables = BackendService.shared.getAllTrackables()
-        if selectedTrackable == nil, let first = trackables.first {
+        
+        // If we have a selected trackable, verify it still exists and reload its history
+        if let selected = selectedTrackable {
+            if trackables.contains(where: { $0.id == selected.id }) {
+                // Update the selected trackable in case its properties changed
+                if let updated = trackables.first(where: { $0.id == selected.id }) {
+                    selectedTrackable = updated
+                    loadHistory(for: updated)
+                }
+            } else {
+                // Selected trackable was deleted, select the first one
+                selectedTrackable = trackables.first
+                if let first = trackables.first {
+                    loadHistory(for: first)
+                }
+            }
+        } else if let first = trackables.first {
+            // No selection yet, select the first one
             selectedTrackable = first
             loadHistory(for: first)
         }
