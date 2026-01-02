@@ -46,6 +46,7 @@ struct TrackView: View {
     private var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE, MMM d"
+        formatter.timeZone = TimeZone.current
         return formatter.string(from: selectedDate)
     }
     

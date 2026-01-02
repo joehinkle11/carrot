@@ -19,6 +19,7 @@ struct CSVExportSheet: View {
     private var dateRangeText: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d, yyyy"
+        formatter.timeZone = TimeZone.current
         return "\(formatter.string(from: startDate)) – \(formatter.string(from: endDate))"
     }
     

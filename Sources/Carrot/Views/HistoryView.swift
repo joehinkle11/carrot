@@ -332,6 +332,7 @@ struct HistoryView: View {
     private var chartDataPoints: [ChartDataPoint] {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "M/d"
+        dateFormatter.timeZone = TimeZone.current
         
         return historyEntries.map { entry in
             ChartDataPoint(
@@ -394,12 +395,15 @@ struct HistoryView: View {
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.timeZone = TimeZone.current
         
         let monthFormatter = DateFormatter()
         monthFormatter.dateFormat = "MMM"
+        monthFormatter.timeZone = TimeZone.current
         
         let dayOfWeekFormatter = DateFormatter()
         dayOfWeekFormatter.dateFormat = "EEEE"
+        dayOfWeekFormatter.timeZone = TimeZone.current
         
         let startOfStartDate = calendar.startOfDay(for: startDate)
         let startOfEndDate = calendar.startOfDay(for: endDate)
@@ -483,6 +487,7 @@ struct HistoryView: View {
         let today = Date()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.timeZone = TimeZone.current
         
         for dayOffset in 0..<30 {
             guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
